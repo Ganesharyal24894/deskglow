@@ -62,7 +62,9 @@ class Daemon:
         before they could approach the per-user bus limit."""
         while not self._stop.is_set():
             await asyncio.sleep(60)
-            if self.device.consecutive_failures >= 40:
+            # only recycle for a *real* connectivity problem, not because the
+            # strip simply isn't configured yet
+            if self.device.address and self.device.consecutive_failures >= 40:
                 _log(f"persistent connect failures "
                      f"(x{self.device.consecutive_failures}); exiting for a clean "
                      f"restart to release resources")
@@ -129,9 +131,16 @@ class Daemon:
         if cmd == "status":
             return {"ok": True, "mode": self.mode_name, "desc": self.mode_desc,
                     "connected": self.device.connected,
+                    "configured": bool(self.device.address),
+                    "address": self.device.address,
                     "screen_monitor": self.state.get("screen_monitor"),
                     "screen_style": self.state.get("screen_style"),
                     "max_brightness": self.state.get("max_brightness")}
+        if cmd == "reload":
+            # picked up a newly-configured address: clear backoff and reconnect
+            self.device.reset_backoff()
+            await self.set_mode(self.mode_name, self.mode_args)
+            return {"ok": True, "configured": bool(self.device.address)}
         if cmd == "set_mode":
             await self.set_mode(req.get("mode"), req.get("args") or {})
             return {"ok": True, "mode": self.mode_name, "desc": self.mode_desc}

@@ -1,85 +1,113 @@
-# sc295 — LED strip control
+# Light — control your Bluetooth LED strip
 
-A background daemon + CLI for the **MELK-OA10 / SC295** BLE LED strip
-(`BE:69:4C:0F:1E:2F`). The daemon holds the Bluetooth connection and runs one
-"mode" at a time; the `sc295` CLI just sends it instant commands over a local
-socket. No manual connect/disconnect, and it stays out of the way of other
-Bluetooth devices (e.g. a speaker) — it never keeps scanning and releases the
-radio when the strip is off.
+Turn a cheap Bluetooth RGB LED strip into a smart **monitor backlight** and mood
+light for your Linux desktop:
 
-## Install
+- 🖥️ **Screen mode** — the strip matches the colors on your screen (bias light)
+- 🌈 **Patterns** — the strip's built-in effects (jump / fade / blink), like the phone app
+- 🕯️ **Calm / Circadian** — gentle color drift, or white that warms up in the evening
+- 🎵 **Audio** — the strip pulses to your music (system sound or microphone)
+- 🎨 **Any color + brightness**, from a simple app or one-word commands
+
+It runs quietly in the background and starts automatically when you log in.
+
+**Works with** the common Bluetooth RGB strips whose phone app is *Lotus Lantern
+/ iDeal LED / LED BLE* and whose controller shows up as **`MELK-…`**, **`ELK-…`**,
+or **`LEDBLE-…`** (the ELK-BLEDOM protocol).
+
+---
+
+## Install (one command)
+
+Open a terminal in this folder and run:
 
 ```bash
 ./install.sh
 ```
 
-This sets up the venv + deps, installs `~/.local/bin/sc295`, and enables a
-`systemd --user` service so the daemon auto-starts on login and restarts on
-failure.
+That's it. The installer will:
+1. Install the bits it needs (asks for your password **once**),
+2. Set up the **Light** app and the `sc295` command,
+3. Offer to **find your strip**.
 
-## Usage
+> Downloaded a ZIP? Unzip it, right-click the folder → *Open in Terminal*, then
+> run `./install.sh`.
+
+### Find your strip
+
+If you skipped it during install, just plug the strip in, keep it nearby, close
+the phone app, and either:
+
+- open the **Light** app and click **“Find strip”**, or
+- run `sc295 setup`
+
+It scans, picks your strip, and flashes it **white** to confirm. Done — you never
+need to know any Bluetooth addresses.
+
+---
+
+## Using it
+
+### The app
+
+Search your apps for **“Light”** and open it. Three tabs:
+
+- **Main** — On / Off, colors, brightness, and Screen / Calm / Circadian / Audio
+- **Patterns** — the built-in effects with a speed slider
+- **Utility** — a Pomodoro focus timer
+
+### Command line (optional)
 
 ```bash
 sc295 on                 # warm white
-sc295 off                # turn off (and release the BT radio after ~30s)
-sc295 color blue         # solid color: name, #rrggbb, or "R G B"
-sc295 color 255 128 0
-sc295 brightness 60      # global brightness ceiling (0-100)
-sc295 status             # what's running
-
-# modes
-sc295 screen             # bias light: average color of the FOCUSED monitor
-sc295 monitor HDMI-0     # or: focus (default) | eDP-1-1 | both
-sc295 calm               # eye-pleasing colors that drift + gently breathe
-sc295 circadian          # cool by day, warm at night, automatically
-sc295 pattern fade-colors --speed 40   # built-in effect (Lotus-style)
-sc295 patterns           # list them (jump/fade/blink variants)
-sc295 pomodoro --work 25 --break 5 --rounds 4   # focus timer, shown in color
-sc295 audio              # brightness reacts to your PC's audio output
+sc295 off
+sc295 color blue         # a name, ff8800 (hex), or "255 128 0"
+sc295 brightness 60      # 0–100
+sc295 screen             # match the screen (add: vivid | average | dominant | edge)
+sc295 calm               # relaxing color drift
+sc295 circadian          # cool by day, warm at night
+sc295 pattern fade-colors --speed 40
+sc295 audio --source mic # or --source system
+sc295 status
 ```
 
-## GUI
+---
+
+## Troubleshooting
+
+- **“No strip set up / not found”** → make sure the strip is powered, close to the
+  PC, the **phone app is closed** (it can hold the connection), and Bluetooth is on.
+  Then run `sc295 setup` again.
+- **Colors flicker at high brightness** → your power adapter is too small for the
+  strip length. Use a bigger one (e.g. a 5 V strip that's several meters long wants
+  ~30 W+). This is a power issue, not the app.
+- **App stuck on “connecting…”** → the strip probably dropped off; it reconnects on
+  its own within a minute. If it doesn't, run `sc295 status`, or restart the
+  service: `systemctl --user restart sc295d`.
+- **Screen mode does nothing** → screen mode needs an X11 session (the default on
+  most setups). It won't capture on a Wayland session.
+
+---
+
+## Uninstall
 
 ```bash
-sc295-gui        # or launch "sc295 LED" from your app menu
+./uninstall.sh
 ```
 
-A small tabbed Tkinter window (zero extra dependencies) with a shared live
-connection dot at the top:
+Removes the app, command, service, and icon. Your strip is untouched.
 
-- **Main** — On/Off/Reset, color presets + custom picker, brightness slider,
-  and the ambient modes (Screen with style + monitor, Calm, Circadian, Audio
-  with system/mic source).
-- **Patterns** — the controller's built-in effects (jump / fade / blink, same
-  set as the Lotus Lantern app) with a speed slider.
-- **Utility** — Pomodoro (work / break / rounds); room for more later.
+---
 
-It drives the same daemon over the socket — no separate Bluetooth logic.
+## How it works (for the curious)
 
-## How it works
-
-- **Protocol**: ELK-BLEDOM (`7E .. EF` frames) on characteristic `fff3`.
-- **Modes** modulate brightness by scaling RGB (device brightness pinned at
-  100), so transitions and breathing are smooth.
-- **Connection**: on drop it reconnects scan-free first (no speaker
-  interference), falling back to a short scan; a stale BlueZ *bond* is dropped
-  automatically if it blocks service resolution.
-
-## Files
-
-- `sc295/` — package: `protocol`, `color`, `device`, `daemon`, `cli`, `modes/`
-- `probe.py`, `discover.py` — low-level BLE probes used while reverse-engineering
-- `sc295.py` — the earlier standalone single-file tool (still works; includes the
-  `sweep`/`soak` flicker diagnostics)
-
-## Debugging the flicker
-
-The full-brightness flicker did **not** reproduce from this tool (a clean,
-rate-limited command stream); it appears to be something the phone app does
-(likely a music/mic-reactive mode or command spamming). If it recurs, reproduce
-with the standalone diagnostics:
-
-```bash
-.venv/bin/python sc295.py soak white --seconds 120   # sustained max-current hold
-.venv/bin/python sc295.py sweep blue                 # find a brightness threshold
-```
+- A small **background service** (`systemd --user`) holds the Bluetooth link and
+  runs one mode at a time. The **app** and the **`sc295`** command are thin clients
+  that talk to it over a local socket — so commands are instant and there's only
+  ever one Bluetooth connection.
+- Protocol: **ELK-BLEDOM** (`7E … EF` frames) on characteristic `fff3`.
+- Code lives in `sc295/` (`daemon`, `cli`, `gui`, `device`, `modes/`). It's plain
+  Python + Tkinter with a few libraries (see `requirements.txt`); nothing is
+  pip-installed system-wide — it all lives in a local `.venv`.
+- `discover.py`, `probe.py`, `sc295.py` are low-level tools kept from reverse-
+  engineering the protocol.

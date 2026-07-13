@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Install the sc295 CLI (~/.local/bin/sc295) and the systemd --user daemon.
+# One-command setup for the sc295 "Light" LED controller.
+# Installs system + python dependencies, the CLI, the GUI ("Light" app), and a
+# background service, then helps you find your strip. Safe to re-run.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -7,16 +9,42 @@ PY="$ROOT/.venv/bin/python"
 BIN="$HOME/.local/bin"
 UNIT_DIR="$HOME/.config/systemd/user"
 
-echo "project root: $ROOT"
+echo "=================================================="
+echo "  Light — LED strip setup"
+echo "=================================================="
+echo "project: $ROOT"
+echo
 
-# 1) venv + deps ------------------------------------------------------------
+# 0) system dependencies ----------------------------------------------------
+if command -v apt-get >/dev/null 2>&1; then
+  missing=""
+  for pkg in python3 python3-venv python3-tk bluez; do
+    dpkg -s "$pkg" >/dev/null 2>&1 || missing="$missing $pkg"
+  done
+  # librsvg gives crisp app icons; optional
+  dpkg -s librsvg2-bin >/dev/null 2>&1 || missing="$missing librsvg2-bin"
+  if [ -n "$missing" ]; then
+    echo "Installing system packages:$missing"
+    echo "(you may be asked for your password)"
+    sudo apt-get update -qq || true
+    sudo apt-get install -y $missing
+  else
+    echo "System packages already installed."
+  fi
+else
+  echo "NOTE: non-Debian/Ubuntu system detected. Please make sure these are"
+  echo "      installed: python3, python3-venv, python3-tk, bluez"
+fi
+echo
+
+# 1) venv + python deps -----------------------------------------------------
 if [ ! -x "$PY" ]; then
-  echo "creating venv..."
+  echo "Creating Python environment…"
   python3 -m venv "$ROOT/.venv"
 fi
-echo "installing python deps..."
+echo "Installing Python packages…"
 "$ROOT/.venv/bin/pip" install --quiet --upgrade pip
-"$ROOT/.venv/bin/pip" install --quiet bleak bleak-retry-connector mss numpy python-xlib
+"$ROOT/.venv/bin/pip" install --quiet -r "$ROOT/requirements.txt"
 
 # 2) CLI wrapper on PATH ----------------------------------------------------
 mkdir -p "$BIN"
@@ -112,4 +140,24 @@ else
 fi
 
 echo
-echo "Done. Try:  sc295 status   |   sc295 screen   |   sc295 color blue"
+echo "=================================================="
+echo "  Installed! Last step: find your LED strip."
+echo "=================================================="
+echo "Make sure the strip is plugged in, close by, and the phone app is CLOSED."
+echo
+
+# offer to run the guided device setup now (only if we have a terminal)
+if [ -t 0 ] && [ -z "${SC295_NO_SETUP:-}" ]; then
+  printf "Find your strip now? [Y/n] "
+  read -r ans || ans=""
+  case "$ans" in
+    [Nn]*) echo "Skipped. Run it later with:  sc295 setup" ;;
+    *)     "$BIN/sc295" setup || echo "Setup didn't complete — run 'sc295 setup' when ready." ;;
+  esac
+else
+  echo "Run:  sc295 setup      (or open the 'Light' app and click 'Find strip')"
+fi
+
+echo
+echo "After setup, open the 'Light' app from your menu, or use the CLI:"
+echo "   sc295 on        sc295 color blue        sc295 screen        sc295 off"

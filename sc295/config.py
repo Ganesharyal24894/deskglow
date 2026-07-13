@@ -1,12 +1,39 @@
-"""Paths, defaults, and persisted daemon state."""
+"""Paths, defaults, persisted daemon state, and the configured strip address."""
 import json
 import os
-
-ADDRESS = "BE:69:4C:0F:1E:2F"
 
 _HOME = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(_HOME, ".config", "sc295")
 STATE_FILE = os.path.join(CONFIG_DIR, "state.json")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
+
+
+def load_config():
+    try:
+        with open(CONFIG_FILE) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def save_config(cfg):
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    tmp = CONFIG_FILE + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(cfg, f, indent=2)
+    os.replace(tmp, CONFIG_FILE)
+
+
+def get_address():
+    """The strip's MAC. Env override wins, then the saved config. None if unset
+    (the CLI/GUI then prompt `setup` to discover it)."""
+    return os.environ.get("SC295_ADDRESS") or load_config().get("address")
+
+
+def set_address(addr):
+    cfg = load_config()
+    cfg["address"] = addr
+    save_config(cfg)
 
 
 def socket_path():

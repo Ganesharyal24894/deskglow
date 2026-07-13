@@ -17,7 +17,7 @@ import time
 from bleak import BleakScanner, BleakClient
 
 from . import protocol
-from .config import ADDRESS, SCAN_TIMEOUT, WRITE_MIN_INTERVAL
+from .config import SCAN_TIMEOUT, WRITE_MIN_INTERVAL, get_address
 
 log = print  # replaced by daemon with a real logger
 
@@ -37,17 +37,17 @@ async def _scan_for(address, timeout):
     # scanner context exit stops discovery -> frees the radio for the speaker
 
 
-def _drop_bond():
+def _drop_bond(address):
     try:
-        subprocess.run(["bluetoothctl", "remove", ADDRESS],
+        subprocess.run(["bluetoothctl", "remove", address],
                        capture_output=True, timeout=10)
     except Exception:
         pass
 
 
 class Device:
-    def __init__(self, address=ADDRESS, logger=None):
-        self.address = address
+    def __init__(self, address=None, logger=None):
+        self._explicit_address = address  # None => read from config each time
         self._client = None
         self._lock = asyncio.Lock()
         self._last_write = 0.0
@@ -60,6 +60,11 @@ class Device:
             log = logger
 
     @property
+    def address(self):
+        """Current strip MAC (explicit override, else the saved config)."""
+        return self._explicit_address or get_address()
+
+    @property
     def connected(self):
         return self._client is not None and self._client.is_connected
 
@@ -69,6 +74,12 @@ class Device:
     @property
     def consecutive_failures(self):
         return self._fail_count
+
+    def reset_backoff(self):
+        """Clear the connect cooldown/failure count (e.g. after (re)configuring
+        the address) so the next attempt happens immediately."""
+        self._cooldown_until = 0.0
+        self._fail_count = 0
 
     @staticmethod
     async def _try_client(target, timeout):
@@ -87,23 +98,26 @@ class Device:
             raise
 
     async def _raw_connect(self):
+        address = self.address
+        if not address:
+            raise ConnectionError("no strip configured — run 'sc295 setup'")
         # 1) scan-free reconnect (no speaker interference) if BlueZ still knows it.
         #    Short timeout: a cached device connects in <2s; we don't want to
         #    freeze a running mode for 12s when this path isn't going to work.
         with contextlib.suppress(Exception):
-            return await self._try_client(self.address, 6.0)
+            return await self._try_client(address, 6.0)
         # 2) short scan to (re)discover, then connect
-        dev = await _scan_for(self.address, SCAN_TIMEOUT)
+        dev = await _scan_for(address, SCAN_TIMEOUT)
         if dev is None:
-            raise ConnectionError(f"{self.address} not found in scan")
+            raise ConnectionError(f"{address} not found in scan")
         await asyncio.sleep(0.3)
         try:
             return await self._try_client(dev, 20.0)
         except Exception as e:
             # 3) stale bond blocking service resolution -> drop and retry once
             log(f"connect failed ({type(e).__name__}); clearing bond, retrying")
-            _drop_bond()
-            dev = await _scan_for(self.address, SCAN_TIMEOUT)
+            _drop_bond(address)
+            dev = await _scan_for(address, SCAN_TIMEOUT)
             if dev is None:
                 raise ConnectionError("device vanished after bond reset")
             await asyncio.sleep(0.3)

@@ -1,0 +1,5 @@
+bleak>=0.22
+bleak-retry-connector
+mss
+numpy
+python-xlib

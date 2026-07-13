@@ -12,10 +12,10 @@ Tabs:
 import asyncio
 import threading
 import tkinter as tk
-from tkinter import ttk, colorchooser
+from tkinter import ttk, colorchooser, messagebox
 
-from . import ipc
-from .config import socket_path
+from . import ipc, discovery
+from .config import socket_path, set_address
 from .cli import _ensure_daemon
 from .modes.patterns import pattern_names
 
@@ -67,6 +67,9 @@ class App:
         self._dot_id = self.dot.create_oval(2, 2, 12, 12, fill="#888", outline="")
         self.status_lbl = ttk.Label(bar, text="connecting…")
         self.status_lbl.grid(row=0, column=1, sticky="w")
+        ttk.Button(bar, text="Find strip", width=10,
+                   command=self.find_strip).grid(row=0, column=2, sticky="e", padx=(6, 0))
+        bar.columnconfigure(1, weight=1)
 
         nb = ttk.Notebook(outer)
         nb.grid(row=1, column=0, sticky="nsew")
@@ -115,8 +118,13 @@ class App:
         ttk.Combobox(mf, textvariable=self.style_var, width=9, state="readonly",
                      values=["average", "vivid", "dominant", "edge"]).grid(row=0, column=1, padx=2)
         self.mon_var = tk.StringVar(value="focus")
+        try:
+            from .screen_util import get_monitors
+            names = list(get_monitors().keys())
+        except Exception:
+            names = []
         mon = ttk.Combobox(mf, textvariable=self.mon_var, width=9, state="readonly",
-                           values=["focus", "HDMI-0", "eDP-1-1", "both"])
+                           values=["focus", "both"] + names)
         mon.grid(row=0, column=2, padx=2)
         mon.bind("<<ComboboxSelected>>", lambda e: self.set_monitor())
 
@@ -252,6 +260,68 @@ class App:
                                    "break": self.brk.get(),
                                    "rounds": self.rounds.get()})
 
+    # ---- first-run device setup -----------------------------------------
+
+    def find_strip(self):
+        self.status_lbl.config(text="scanning for strips… (~10s)")
+        def worker():
+            try:
+                cands = discovery.scan_candidates_sync(timeout=10.0)
+                err = None
+            except Exception as e:
+                cands, err = None, str(e)
+            self.root.after(0, lambda: self._got_candidates(cands, err))
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _got_candidates(self, cands, err):
+        if err:
+            messagebox.showerror("Find strip", f"Scan failed: {err}\n\nIs Bluetooth on?")
+            return
+        if not cands:
+            messagebox.showwarning(
+                "Find strip",
+                "No LED strips found.\n\nMake sure the strip is plugged in and "
+                "close by, and that the phone app is closed, then try again.")
+            return
+        if len(cands) == 1:
+            self._choose_strip(cands[0])
+        else:
+            self._chooser_dialog(cands)
+
+    def _chooser_dialog(self, cands):
+        top = tk.Toplevel(self.root)
+        top.title("Pick your strip")
+        top.resizable(False, False)
+        ttk.Label(top, text="Which one is your strip?").grid(
+            row=0, column=0, padx=10, pady=(10, 4), sticky="w")
+        lb = tk.Listbox(top, height=min(8, len(cands)), width=44, exportselection=False)
+        for c in cands:
+            mark = "  ← likely" if c["certain"] else ""
+            lb.insert("end", f"{c['name']}   {c['address']}   {c['rssi']}dBm{mark}")
+        lb.selection_set(0)
+        lb.grid(row=1, column=0, padx=10)
+
+        def ok():
+            sel = lb.curselection()
+            top.destroy()
+            if sel:
+                self._choose_strip(cands[sel[0]])
+
+        ttk.Button(top, text="Use this strip", command=ok).grid(
+            row=2, column=0, pady=10)
+        top.transient(self.root)
+        top.grab_set()
+
+    def _choose_strip(self, cand):
+        set_address(cand["address"])
+        self.status_lbl.config(text=f"saved {cand['address']} — testing…")
+        self.submit({"cmd": "reload"})
+        self.submit({"cmd": "set_mode", "mode": "solid",
+                     "args": {"rgb": [255, 255, 255]}},
+                    lambda r: messagebox.showinfo(
+                        "All set", "Saved! The strip should be white now.\n\n"
+                        "Use the buttons to control it."))
+
     # ---- status polling --------------------------------------------------
 
     def poll(self):
@@ -262,6 +332,10 @@ class App:
         if not resp or not resp.get("ok"):
             self.dot.itemconfig(self._dot_id, fill="#c0392b")
             self.status_lbl.config(text="daemon unreachable")
+            return
+        if resp.get("configured") is False:
+            self.dot.itemconfig(self._dot_id, fill="#888")
+            self.status_lbl.config(text="No strip set up — click ‘Find strip’ →")
             return
         connected = resp.get("connected")
         self.dot.itemconfig(self._dot_id, fill="#27ae60" if connected else "#e67e22")
