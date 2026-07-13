@@ -1,0 +1,12 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# debug/experiment logs (kept out of history)
+*.log
+
+# editor / os
+.DS_Store
+*.swp
