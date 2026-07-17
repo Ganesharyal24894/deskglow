@@ -81,9 +81,11 @@ sc295 status
 - **Colors flicker at high brightness** → your power adapter is too small for the
   strip length. Use a bigger one (e.g. a 5 V strip that's several meters long wants
   ~30 W+). This is a power issue, not the app.
-- **App stuck on “connecting…”** → the strip probably dropped off; it reconnects on
-  its own within a minute. If it doesn't, run `sc295 status`, or restart the
-  service: `systemctl --user restart sc295d`.
+- **App stuck on “connecting…”, or shows connected but the strip won't respond**
+  → run `sc295 repair`. It resets the Bluetooth adapter and reconnects. (The app
+  also auto-detects a dead link within ~12s and reconnects on its own.)
+- **Very dim brightness flickers** → cheap controllers have unstable PWM at very
+  low levels; keep brightness above ~20% for a rock-steady color.
 - **Screen mode does nothing** → screen mode needs an X11 session (the default on
   most setups). It won't capture on a Wayland session.
 

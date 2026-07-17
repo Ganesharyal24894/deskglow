@@ -134,11 +134,29 @@ def do_setup():
     return 0
 
 
+def do_repair():
+    """Recover a stuck Bluetooth adapter: reset it, drop the stale bond, reconnect.
+    Use when the strip shows 'connected' but won't respond, or won't connect."""
+    print("Repairing Bluetooth… (this briefly resets your Bluetooth adapter)")
+    def bt(*args):
+        subprocess.run(["bluetoothctl", *args], capture_output=True, timeout=12)
+    bt("power", "off"); time.sleep(3)
+    bt("power", "on"); time.sleep(3)
+    addr = get_address()
+    if addr:
+        bt("remove", addr)  # clear any stale bond/cache
+    print("Adapter reset. Reconnecting the strip…")
+    asyncio.run(_send({"cmd": "reload"}))
+    print("Done. Give it a few seconds; check with:  sc295 status")
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog="sc295", description="Control the SC295 LED strip")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("setup", help="find and save your LED strip (run this first)")
+    sub.add_parser("repair", help="reset Bluetooth if the strip is stuck/unresponsive")
     sub.add_parser("on", help="turn on (warm white)")
     sub.add_parser("off", help="turn the strip off")
     sub.add_parser("reset", help="force known-good state (on, full, solid white)")
@@ -230,6 +248,8 @@ def main(argv=None):
         return 0
     if args.cmd == "setup":
         return do_setup()
+    if args.cmd == "repair":
+        return do_repair()
     # everything else needs a configured strip
     if args.cmd not in ("status", "restart-daemon") and not get_address():
         print("No strip configured yet. Run:  sc295 setup", file=sys.stderr)

@@ -53,6 +53,7 @@ class Device:
         self._last_write = 0.0
         self._last_rgb = None
         self._last_send_ts = 0.0
+        self._last_verify_ts = 0.0
         self._cooldown_until = 0.0
         self._fail_count = 0
         if logger:
@@ -184,13 +185,21 @@ class Device:
     async def set_rgb(self, r, g, b, force=False):
         rgb = (int(r), int(g), int(b))
         now = time.monotonic()
-        # de-dup identical colors, but re-assert every ~2s as a keepalive
-        if (not force and rgb == self._last_rgb
+        # Periodically use an ACKNOWLEDGED write (response=True). A normal
+        # write-without-response can't tell a live link from a dead one, so a
+        # silently-dropped strip keeps reporting "connected" while nothing works.
+        # A write-with-response fails on a dead link -> we drop and reconnect.
+        verify = (now - self._last_verify_ts) >= 12.0
+        # de-dup identical colors, but re-assert every ~2s as a keepalive (and
+        # never skip a verify tick, so liveness is checked even on a static color)
+        if (not force and not verify and rgb == self._last_rgb
                 and now - self._last_send_ts < 2.0):
             return
-        await self._write(protocol.color(*rgb))
+        await self._write(protocol.color(*rgb), response=verify)
         self._last_rgb = rgb
         self._last_send_ts = now
+        if verify:
+            self._last_verify_ts = now
 
     async def power(self, on, reliable=False):
         await self._write(protocol.power(on), response=reliable)
