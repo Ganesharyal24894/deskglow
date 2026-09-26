@@ -1,0 +1,36 @@
+{
+  "_comment": "Allow-list of imports per layer. Anything not listed is a violation. Changing this file is an architecture decision (see docs/ARCHITECTURE.md).",
+  "package": "deskglow",
+  "layers": {
+    "model": {
+      "paths": ["deskglow/model"],
+      "internal": ["model"],
+      "modules": ["__future__", "typing", "dataclasses", "enum", "math", "colorsys", "copy", "re", "datetime", "json", "functools"]
+    },
+    "services": {
+      "paths": ["deskglow/services"],
+      "internal": ["model", "services"],
+      "modules": ["__future__", "typing", "abc", "dataclasses", "enum", "asyncio", "collections"]
+    },
+    "controller": {
+      "paths": ["deskglow/controller"],
+      "internal": ["model", "services", "controller"],
+      "modules": ["__future__", "typing", "dataclasses", "enum", "math", "colorsys", "copy", "re", "datetime", "json", "functools", "itertools", "collections", "asyncio", "contextlib", "time", "logging", "numpy"]
+    },
+    "view": {
+      "paths": ["deskglow/view"],
+      "internal": ["model", "services", "controller", "view"],
+      "modules": ["__future__", "typing", "dataclasses", "enum", "math", "colorsys", "re", "datetime", "json", "functools", "itertools", "collections", "asyncio", "contextlib", "time", "logging", "argparse", "sys", "textwrap", "threading", "PySide6"]
+    },
+    "drivers": {
+      "paths": ["deskglow/drivers"],
+      "internal": ["model", "services", "drivers"],
+      "modules": ["__future__", "typing", "dataclasses", "enum", "math", "re", "json", "functools", "collections", "asyncio", "contextlib", "time", "logging", "os", "sys", "subprocess", "shutil", "socket", "secrets", "hmac", "signal", "pathlib", "tempfile", "concurrent", "threading", "ctypes", "winreg", "plistlib", "textwrap", "bleak", "mss", "numpy", "Xlib", "soundcard", "platformdirs", "Quartz", "AppKit", "dbus_fast", "pynput", "tzlocal", "tzdata"]
+    },
+    "app": {
+      "paths": ["deskglow/app", "deskglow/__init__.py", "deskglow/__main__.py"],
+      "internal": ["model", "services", "controller", "view", "drivers", "app"],
+      "modules": ["__future__", "typing", "asyncio", "contextlib", "logging", "os", "sys", "signal", "argparse", "importlib"]
+    }
+  }
+}

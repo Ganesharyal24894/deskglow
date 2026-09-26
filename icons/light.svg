@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#232c3d"/>
+      <stop offset="1" stop-color="#0c0e14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#fff4cf"/>
+      <stop offset="0.55" stop-color="#ffd15c"/>
+      <stop offset="1" stop-color="#ff9d3c"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)"/>
+  <!-- soft glow halo -->
+  <circle cx="128" cy="108" r="82" fill="#ffd15c" opacity="0.22"/>
+  <!-- bulb -->
+  <path d="M128 40a60 60 0 0 1 38 106c-9 7-14 16-14 27h-48c0-11-5-20-14-27a60 60 0 0 1 38-106z"
+        fill="url(#glow)"/>
+  <!-- filament -->
+  <path d="M112 118l16-20 16 20" fill="none" stroke="#c9820a" stroke-width="6"
+        stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <!-- base -->
+  <rect x="104" y="176" width="48" height="16" rx="6" fill="#ccd4de"/>
+  <rect x="110" y="196" width="36" height="12" rx="6" fill="#a9b3be"/>
+  <!-- RGB dots: signals it's an RGB light controller -->
+  <circle cx="92" cy="222" r="9" fill="#ff5252"/>
+  <circle cx="128" cy="228" r="9" fill="#4dff8d"/>
+  <circle cx="164" cy="222" r="9" fill="#4d8bff"/>
+</svg>

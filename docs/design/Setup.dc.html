@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deskglow first run</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',sans-serif}
+a{color:inherit}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 1040px; height: 720px; display: flex; align-items: center; justify-content: center; background: {{p.bg}}; font-family: 'IBM Plex Sans', sans-serif; color: {{p.text}}; overflow: hidden">
+<section aria-label="Find your strip" style="width: 540px; box-sizing: border-box; padding: 36px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 24px; display: flex; flex-direction: column; gap: 22px; box-shadow: {{p.cardShadow}}">
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="width: 30px; height: 9px; border-radius: 5px; background: #FFB46E; box-shadow: 0 0 16px 3px #FFB46E"></div>
+<div style="font-family: Sora, sans-serif; font-weight: 600; font-size: 18px">deskglow</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 28px; letter-spacing: -0.02em">Let's find your strip</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: {{p.muted}}">Plug it in and keep it within a few metres. Close the phone app first: these strips accept one connection at a time.</p>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: {{p.muted}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{p.ink}}" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"></path></svg>
+<span style="flex-grow: 1">Scanning… found 3 LED controllers</span>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 9px; background: transparent; border: 1px solid {{p.line2}}; color: {{p.text}}; font: 500 13px 'IBM Plex Sans', sans-serif; cursor: pointer">Scan again</button>
+</div>
+<div role="radiogroup" aria-label="Strips found" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{found}}" as="d" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{d.checked}}" style="{{d.style}}">
+<div style="{{d.radio}}"></div>
+<div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; text-align: left">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: {{p.text}}">{{d.name}}<sc-if value="{{d.likely}}" hint-placeholder-val="{{false}}"><span style="padding: 2px 8px; border-radius: 10px; background: {{p.badgeBg}}; color: {{p.badgeText}}; font-size: 11px; font-weight: 600">Most likely</span></sc-if></span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{p.muted}}">{{d.addr}}</span>
+</div>
+<div aria-label="{{d.signalText}}" style="display: flex; align-items: flex-end; gap: 3px; height: 18px">
+<sc-for list="{{d.bars}}" as="b" hint-placeholder-count="4"><div style="{{b}}"></div></sc-for>
+</div>
+<span style="width: 50px; text-align: right; font-size: 12px; color: {{p.muted}}">{{d.signalText}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<button type="button" style="height: 46px; padding: 0 4px; background: transparent; border: 0; color: {{p.muted}}; font: 500 14px 'IBM Plex Sans', sans-serif; text-decoration: underline; cursor: pointer">Enter address manually</button>
+<span style="flex-grow: 1"></span>
+<a href="Main.dc.html" style="height: 46px; padding: 0 22px; display: flex; align-items: center; border-radius: 12px; background: #FFB46E; border: {{p.primaryBorder}}; color: #141413; text-decoration: none; font-size: 14px; font-weight: 600">Use this strip</a>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":1040,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const theme = this.props.theme ?? 'dark';
+    const PAL = {
+      dark: { bg: '#0F0F12', panel: '#17171C', line: '#25252D', line2: '#2A2A33', tile: '#1C1C22', sel: '#23232B', text: '#ECECF1', muted: '#A0A0AD', ink: '#FFB46E', badgeBg: '#2B2419', badgeText: '#FFB46E', barOn: '#ECECF1', barOff: '#34343D', radioOff: '#4A4A55', cardShadow: 'none', primaryBorder: '0' },
+      light: { bg: '#F4F3EF', panel: '#FFFFFF', line: '#E4E2DC', line2: '#D6D4CD', tile: '#F8F7F4', sel: '#FFFFFF', text: '#1A1A1F', muted: '#5E5E69', ink: '#8C633D', badgeBg: '#FBEBDD', badgeText: '#7A5230', barOn: '#1A1A1F', barOff: '#D6D4CD', radioOff: '#A9A7A0', cardShadow: '0 12px 40px rgba(20,20,30,0.08)', primaryBorder: '1px solid #8C633D' },
+    };
+    const p = PAL[theme];
+    const rows = [
+      { name: 'MELK-OA10', addr: 'A4:C1:38:5E:22:9B', level: 4, signalText: 'Strong', likely: true },
+      { name: 'ELK-BLEDOM', addr: 'BE:32:57:A0:13:6C', level: 2, signalText: 'Fair', likely: false },
+      { name: 'LEDBLE-7F21', addr: 'C4:18:E9:02:7F:21', level: 1, signalText: 'Weak', likely: false },
+    ];
+    const found = rows.map((r, i) => ({
+      ...r, checked: i === 0 ? 'true' : 'false',
+      style: 'display:flex;align-items:center;gap:14px;min-height:64px;padding:0 16px;border-radius:14px;cursor:pointer;font-family:inherit;' + (i === 0 ? 'background:' + p.sel + ';border:1px solid ' + p.ink + ';' : 'background:' + p.tile + ';border:1px solid ' + p.line + ';'),
+      radio: 'width:18px;height:18px;border-radius:9px;box-sizing:border-box;flex-shrink:0;' + (i === 0 ? 'border:5px solid ' + p.ink + ';' : 'border:2px solid ' + p.radioOff + ';'),
+      bars: [1, 2, 3, 4].map((n) => 'width:4px;height:' + (n * 4 + 2) + 'px;border-radius:2px;background:' + (n <= r.level ? p.barOn : p.barOff) + ';'),
+    }));
+    return { found, p };
+  }
+}
+</script>
+</body>
+</html>

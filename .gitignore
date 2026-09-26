@@ -1,0 +1,62 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*$py.class
+
+# build / packaging artifacts
+build/
+dist/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+.eggs/
+MANIFEST
+pip-wheel-metadata/
+
+# test / coverage artifacts
+.pytest_cache/
+.cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+nosetests.xml
+junit*.xml
+.hypothesis/
+
+# linter / type-checker caches
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+
+# environments / task runners
+.tox/
+.nox/
+venv/
+env/
+ENV/
+.env
+.envrc
+.python-version
+
+# debug/experiment logs (kept out of history)
+*.log
+
+# editor / os
+.DS_Store
+.AppleDouble
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

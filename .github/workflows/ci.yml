@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    env:
+      # the GUI tests (pytest-qt) run without a display
+      QT_QPA_PLATFORM: offscreen
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Qt runtime libraries (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libegl1 libgl1 libxkbcommon-x11-0 libxcb-cursor0 libdbus-1-3
+
+      # macOS caps AF_UNIX paths at 104 bytes and the default pytest tmp dir
+      # lives deep under /private/var/folders; keep socket paths short.
+      - name: Short pytest temp dir (macOS)
+        if: runner.os == 'macOS'
+        run: echo "PYTEST_ADDOPTS=--basetemp=/tmp/dg" >> "$GITHUB_ENV"
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      # docs/ARCHITECTURE.md: line limit, layer allow-list, fresh presets,
+      # ruff and the whole (offline, headless) test suite, in one command.
+      - name: scripts/check.py
+        run: python scripts/check.py
+
+  build:
+    name: build + smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build twine
+
+      # the hatch build hook regenerates deskglow/model/presets_gen.py
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Check package metadata
+        run: twine check dist/*
+
+      # Install the wheel alone into a fresh venv and run it from outside the
+      # checkout, so the installed package (not the source tree) is exercised.
+      - name: Smoke-test the installed wheel
+        run: |
+          python -m venv "$RUNNER_TEMP/smoke"
+          if [ "$RUNNER_OS" = "Windows" ]; then BIN="$RUNNER_TEMP/smoke/Scripts"; else BIN="$RUNNER_TEMP/smoke/bin"; fi
+          "$BIN/python" -m pip install --quiet dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$BIN/deskglow" --help
+          "$BIN/python" -c "import deskglow.app.wiring as w; print(type(w.build_services()).__name__)"
+
+      - name: Upload artifacts
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*

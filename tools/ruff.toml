@@ -1,0 +1,13 @@
+# Lint settings for the protocol-exploration scripts in this directory.
+#
+# These scripts are historical reverse-engineering notes, not part of the
+# installed `deskglow` package (see tools/README.md). Ruff resolves configuration
+# per-file from the nearest config in the directory tree, so this file relaxes
+# the project's style rules for tools/ only: we still want real errors
+# (undefined names, unused imports, syntax problems) to fail CI, but we do not
+# want to churn these files for stylistic nits.
+line-length = 100
+target-version = "py39"
+
+[lint]
+select = ["F", "E9"]

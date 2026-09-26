@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deskglow sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',sans-serif}
+a{color:inherit}a:hover{color:inherit}
+</style>
+</helmet>
+<nav aria-label="Main" style="width: 216px; height: 720px; box-sizing: border-box; padding: 24px 14px 16px; background: {{p.side}}; border-right: 1px solid {{p.sideLine}}; display: flex; flex-direction: column; gap: 28px; font-family: 'IBM Plex Sans', sans-serif; color: {{p.text}}">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 10px">
+<div style="width: 26px; height: 8px; border-radius: 4px; background: {{accent}}; box-shadow: 0 0 14px 2px {{accent}}"></div>
+<div style="font-family: Sora, sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.01em">deskglow</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{items}}" as="item" hint-placeholder-count="5">
+<a href="{{item.href}}" style="{{item.style}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{item.icon}}"></path></svg><span>{{item.label}}</span></a>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 6px 0 12px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{p.muted}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{modeIcon}}"></path></svg>
+<span style="font-size: 14px; font-weight: 500; color: {{p.muted}}; flex-grow: 1">Dark mode</span>
+<button type="button" role="switch" aria-checked="{{darkStr}}" aria-label="Dark mode" onClick="{{toggle}}" style="{{track}}"><span style="{{knob}}"></span></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 14px">
+<div style="display: flex; align-items: center; gap: 8px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{p.muted}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 7 10 10-5 5V2l5 5L7 17"></path></svg>
+<div style="font-size: 13px; font-weight: 600">Desk strip</div>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: {{p.muted}}">
+<div style="width: 8px; height: 8px; border-radius: 4px; background: {{p.ok}}"></div>
+<span>Connected</span>
+<span style="flex-grow: 1"></span>
+<span style="font-family: 'IBM Plex Mono', monospace">-58 dBm</span>
+</div>
+</div>
+</div>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["home","effects","sync","focus","settings"],"default":"home"},"accent":{"editor":"color","default":"#FFB46E"},"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"onToggleTheme":{"editor":null},"$preview":{"width":216,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'home';
+    const accent = this.props.accent ?? '#FFB46E';
+    const theme = this.props.theme ?? 'dark';
+    const dark = theme === 'dark';
+    const p = dark
+      ? { side: '#0F0F12', sideLine: '#22222A', panel: '#17171C', line: '#25252D', sel: '#1F1F26', text: '#ECECF1', strong: '#FFFFFF', muted: '#A0A0AD', ok: '#4ADE80', off: '#2A2A33', knobOff: '#A0A0AD' }
+      : { side: '#EFEEEA', sideLine: '#E2E0DA', panel: '#FFFFFF', line: '#E4E2DC', sel: '#FFFFFF', text: '#1A1A1F', strong: '#0E0E12', muted: '#5E5E69', ok: '#16A34A', off: '#D6D4CD', knobOff: '#FFFFFF' };
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
+    const ink = dark ? accent : 'rgb(' + Math.round(r * 0.55) + ',' + Math.round(g * 0.55) + ',' + Math.round(b * 0.55) + ')';
+    const base = 'display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:10px;font-size:14px;font-weight:500;text-decoration:none;';
+    const defs = [
+      { id: 'home', label: 'Home', href: 'Main.dc.html', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z' },
+      { id: 'effects', label: 'Effects', href: 'Effects.dc.html', icon: 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6' },
+      { id: 'sync', label: 'Sync', href: 'Sync.dc.html', icon: 'M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 20h8M12 16v4' },
+      { id: 'focus', label: 'Focus', href: 'Focus.dc.html', icon: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 9v4l2.5 2M9 2h6' },
+      { id: 'settings', label: 'Settings', href: 'Settings.dc.html', icon: 'M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1M15 4v4M9 10v4M17 16v4' },
+    ];
+    const items = defs.map((d) => ({
+      ...d,
+      style: base + (d.id === active
+        ? 'background:' + p.sel + ';color:' + p.strong + ';box-shadow:inset 3px 0 0 ' + ink + (dark ? '' : ',0 1px 2px rgba(20,20,30,0.08)') + ';'
+        : 'background:transparent;color:' + p.muted + ';'),
+    }));
+    return {
+      items, accent, p, darkStr: dark ? 'true' : 'false',
+      modeIcon: dark ? 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z' : 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+      toggle: () => { if (this.props.onToggleTheme) this.props.onToggleTheme(); },
+      track: 'position:relative;width:44px;height:26px;flex-shrink:0;border-radius:13px;cursor:pointer;padding:0;border:0;background:' + (dark ? ink : p.off) + ';',
+      knob: 'position:absolute;top:3px;left:' + (dark ? '21px' : '3px') + ';width:20px;height:20px;border-radius:10px;background:' + (dark ? '#141413' : p.knobOff) + ';box-shadow:0 1px 2px rgba(0,0,0,0.25);',
+    };
+  }
+}
+</script>
+</body>
+</html>
