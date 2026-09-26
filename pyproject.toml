@@ -64,8 +64,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/OWNER/deskglow"
-Issues = "https://github.com/OWNER/deskglow/issues"
+Homepage = "https://github.com/Ganesharyal24894/deskglow"
+Issues = "https://github.com/Ganesharyal24894/deskglow/issues"
 
 [project.scripts]
 deskglow = "deskglow.app.cli:main"

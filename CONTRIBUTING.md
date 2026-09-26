@@ -12,7 +12,7 @@ You need Python 3.9 or newer. BlueZ (`bluez`) is only needed if you want to
 drive a real strip; it is **not** needed to run the tests.
 
 ```bash
-git clone https://github.com/OWNER/deskglow
+git clone https://github.com/Ganesharyal24894/deskglow
 cd deskglow
 
 python -m venv .venv

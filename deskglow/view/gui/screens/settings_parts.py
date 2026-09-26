@@ -8,7 +8,7 @@ from ..widgets.base import Button, Text
 from ..widgets.controls import Segmented, Slider, Toggle
 from .common import card, h2, small
 
-PROJECT_URL = "https://github.com/OWNER/deskglow"
+PROJECT_URL = "https://github.com/Ganesharyal24894/deskglow"
 
 
 def strip_card():

@@ -133,7 +133,7 @@ set up start-at-login; the from-source steps below do.
 ### Linux (from source: CLI + service)
 
 ```bash
-git clone https://github.com/OWNER/deskglow
+git clone https://github.com/Ganesharyal24894/deskglow
 cd deskglow
 ./install.sh
 ```
@@ -165,7 +165,7 @@ nothing else in the script needs root.)
 Needs Python 3.10+ (python.org or Homebrew). In Terminal:
 
 ```bash
-git clone https://github.com/OWNER/deskglow
+git clone https://github.com/Ganesharyal24894/deskglow
 cd deskglow
 ./install.sh
 ```
@@ -181,7 +181,7 @@ asks.
 In PowerShell, with Python 3.10+ from python.org (tick *Add python.exe to PATH*):
 
 ```powershell
-git clone https://github.com/OWNER/deskglow
+git clone https://github.com/Ganesharyal24894/deskglow
 cd deskglow
 py -m venv .venv
 .venv\Scripts\python -m pip install -e ".[all]"

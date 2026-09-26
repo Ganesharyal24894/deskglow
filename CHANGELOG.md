@@ -188,5 +188,5 @@ Initial release.
 - `install.sh` / `uninstall.sh` for a from-source install of the app, CLI,
   service and desktop icon.
 
-[Unreleased]: https://github.com/OWNER/deskglow/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/OWNER/deskglow/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Ganesharyal24894/deskglow/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Ganesharyal24894/deskglow/releases/tag/v0.1.0
