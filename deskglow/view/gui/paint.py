@@ -90,6 +90,22 @@ def glow(p, rect, radius, color, alpha, blur, spread=0.0):
     p.drawImage(QPointF(ox, oy), img)
 
 
+def soft_shadow(p, rect, radius, color, alpha, dy=1.0, blur=2.0, layers=8):
+    """A small CSS `box-shadow: 0 dy blur color` that follows rounded corners:
+    the shape, offset by dy, box-blurred by stacking grown/shrunk copies."""
+    if alpha <= 0:
+        return
+    p.save()
+    p.setPen(Qt.PenStyle.NoPen)
+    p.setBrush(QBrush(qcolor(color, alpha / layers)))
+    base = QRectF(rect).translated(0, dy)
+    for i in range(layers):
+        g = blur * ((i + 0.5) / layers - 0.5)
+        r = base.adjusted(-g, -g, g, g)
+        p.drawRoundedRect(r, max(0.0, radius + g), max(0.0, radius + g))
+    p.restore()
+
+
 def text(p, rect, value, font, color, align=Qt.AlignmentFlag.AlignLeft
          | Qt.AlignmentFlag.AlignVCenter):
     p.save()

@@ -37,5 +37,7 @@ def ctx(qapp, client, gui_services):
     from deskglow.view.gui import fonts
     fonts.load()
     bridge = SyncBridge(client)
-    return AppContext(bridge, StatusPoller(bridge), gui_services)
+    context = AppContext(bridge, StatusPoller(bridge), gui_services)
+    yield context
+    context.theme.stop()          # a test's context must not follow later tests' desktop
 

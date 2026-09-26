@@ -139,11 +139,12 @@ def test_no_tray_disables_keep_running(qtbot, page, ctx):
     assert not page.toggles["tray"].switch.isEnabled()
 
 
-def test_theme_choice_is_saved_and_light_stays_dark_for_now(qtbot, page, client):
+def test_theme_choice_is_saved_and_applied(qtbot, page, client):
     seg = page.themes
     qtbot.mouseClick(seg, Qt.MouseButton.LeftButton, pos=seg.rects()["light"].center().toPoint())
     assert client.sent() == [{"cmd": "config", "key": "theme", "value": "light"}]
-    assert theme.current() is theme.DARK
+    assert theme.current() is theme.LIGHT
+    assert theme.LIGHT.bg in qtbot_app_stylesheet()
 
 
 def test_about_buttons_open_logs_and_github(qtbot, page, monkeypatch):
@@ -155,13 +156,10 @@ def test_about_buttons_open_logs_and_github(qtbot, page, monkeypatch):
     assert opened[1].startswith("https://github.com/")
 
 
-def test_a_registered_light_palette_is_applied_when_picked(qtbot, page, monkeypatch):
-    light = theme.Palette(**{**theme.DARK.__dict__, "name": "light", "bg": "#FAFAFA"})
-    monkeypatch.setitem(theme.PALETTES, "light", light)
-    seg = page.themes
-    qtbot.mouseClick(seg, Qt.MouseButton.LeftButton, pos=seg.rects()["light"].center().toPoint())
-    assert theme.current() is light
-    assert "#FAFAFA" in qtbot_app_stylesheet()
+def test_theme_row_explains_the_sidebar_switch(page):
+    from deskglow.view.gui.screens.settings_parts import THEME_DESC
+    from PySide6.QtWidgets import QLabel
+    assert THEME_DESC in [w.text() for w in page.findChildren(QLabel)]
 
 
 def qtbot_app_stylesheet():

@@ -1,4 +1,5 @@
-"""Render every Deskglow desktop-app screen offscreen and save PNGs.
+"""Render every Deskglow desktop-app screen offscreen, in the dark and the
+light theme, and save PNGs (NAME.png and NAME_light.png).
 
     QT_QPA_PLATFORM=offscreen python tools/gui_screenshots.py OUTPUT_DIR
 
@@ -49,6 +50,7 @@ class FakeClient:
 
     def __init__(self):
         self.state = "home"
+        self.theme = "dark"
 
     async def ensure_daemon(self):
         return True
@@ -56,7 +58,7 @@ class FakeClient:
     async def request(self, req, timeout=25.0):
         cmd = req.get("cmd")
         if cmd == "status":
-            return dict(BASE, **STATES[self.state])
+            return dict(BASE, theme=self.theme, **STATES[self.state])
         if cmd == "monitors":
             return {"ok": True, "monitors": MONITORS}
         if cmd == "scan":
@@ -115,16 +117,19 @@ def main(out):
     if hasattr(ui.pages.get("sync"), "meter"):
         ui.pages["sync"].meter_demo([30, 52, 70, 88, 64, 45, 78, 92, 60, 40, 55, 72, 84, 58,
                                      36, 48, 66, 42])
-    for page in ("home", "effects", "sync", "focus", "settings", "setup"):
-        settle(app, ui, client, page)
-        ui.window.go(page)
-        settle(app, ui, client, page)
-        ui.window.grab().save(os.path.join(out, f"{page}.png"))
-    settle(app, ui, client, "tray")
-    ui.panel.resize(340, 520)
-    ui.panel.show()
-    settle(app, ui, client, "tray")
-    ui.panel.grab().save(os.path.join(out, "tray.png"))
+    for variant, suffix in (("dark", ""), ("light", "_light")):
+        client.theme = variant
+        for page in ("home", "effects", "sync", "focus", "settings", "setup"):
+            settle(app, ui, client, page)
+            ui.window.go(page)
+            settle(app, ui, client, page)
+            ui.window.grab().save(os.path.join(out, f"{page}{suffix}.png"))
+        settle(app, ui, client, "tray")
+        ui.panel.resize(340, 520)
+        ui.panel.show()
+        settle(app, ui, client, "tray")
+        ui.panel.grab().save(os.path.join(out, f"tray{suffix}.png"))
+        ui.panel.hide()
     ui.shutdown()
     print("saved to", out)
 

@@ -4,7 +4,7 @@ from PySide6.QtCore import QRectF, Qt
 from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QVBoxLayout, QWidget
 
 from ....model.presets import get_preset
-from .. import fonts, paint
+from .. import fonts, paint, theme
 from ..throttle import Throttle
 from ..vm import effects as vm
 from ..widgets.base import Text, token
@@ -14,7 +14,7 @@ from .common import Page, card, title_block
 
 
 class PreviewBar(QWidget):
-    """The 120x14 preview in the Playing bar, with a faint white glow."""
+    """The 120x14 preview in the Playing bar, with a faint white glow (dark only)."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,7 +24,7 @@ class PreviewBar(QWidget):
     def paintEvent(self, _e):
         p = paint.begin(self)
         r = QRectF(10, 10, 120, 14)
-        paint.glow(p, r, 7, token("preview_glow"), 0.12, 18, 0)
+        paint.glow(p, r, 7, token("preview_glow"), theme.current().preview_glow_alpha, 18, 0)
         if self.stops:
             gradient_bar(p, r, self.stops)
         p.end()
@@ -42,7 +42,7 @@ class EffectsPage(Page):
         titles, _t, _s = title_block(
             "Effects", "Run on the strip's own controller, so they stay smooth with no PC load.")
         head.addLayout(titles, 1)
-        self.filters = Segmented(vm.FILTERS, "all", well="card", well_border="card_border")
+        self.filters = Segmented(vm.FILTERS, "all", well="filter_well", well_border="card_border")
         head.addWidget(self.filters, 0, Qt.AlignmentFlag.AlignBottom)
         self.body.addLayout(head)
 

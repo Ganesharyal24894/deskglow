@@ -15,7 +15,7 @@ class Shell(QWidget):
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
-        self.sidebar = Sidebar()
+        self.sidebar = Sidebar(ctx.theme)
         lay.addWidget(self.sidebar)
         self.stack = QStackedWidget()
         self.pages = dict(pages)

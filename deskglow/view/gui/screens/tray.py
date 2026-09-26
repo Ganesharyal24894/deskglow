@@ -1,8 +1,8 @@
-"""The tray quick panel: power, brightness, favourites and quick modes."""
+"""The tray quick panel: theme, power, brightness, favourites and quick modes."""
 from PySide6.QtCore import QRectF, Qt, Signal
 from PySide6.QtWidgets import QGridLayout, QHBoxLayout, QVBoxLayout, QWidget
 
-from .. import fonts, paint
+from .. import fonts, icons, paint, theme
 from ..accent import accent
 from ..throttle import Throttle
 from ..vm import home as home_vm
@@ -36,6 +36,9 @@ class TrayPanel(QWidget):
         names.addWidget(self.name)
         names.addWidget(self.status)
         head.addLayout(names, 1)
+        self.theme_button = Button("", "ghost", 36, 10, icon=icons.SUN, pad=0, min_width=36)
+        self.theme_button.setFixedWidth(36)
+        head.addWidget(self.theme_button)
         self.power = Toggle()
         self.power.setAccessibleName("Power")
         head.addWidget(self.power)
@@ -79,9 +82,21 @@ class TrayPanel(QWidget):
         self.slider.valueChanged.connect(self._send_bri)
         self.power.toggled.connect(lambda _on: ctx.send(home_vm.power(ctx.status)))
         self.swatches.picked.connect(lambda c: ctx.send(home_vm.solid(c)))
+        self.theme_button.clicked.connect(ctx.theme.flip)
         self.open_button.clicked.connect(self.open_app.emit)
         self.quit_button.clicked.connect(self.quit_app.emit)
         ctx.status_changed.connect(self.show_status)
+        ctx.theme.changed.connect(self.apply_theme)
+        self.apply_theme()
+
+    def apply_theme(self):
+        """The button offers the other theme: a sun while dark, a moon while light."""
+        dark = theme.current().name == "dark"
+        self.theme_button.icon_markup = icons.SUN if dark else icons.MOON
+        label = "Switch to light mode" if dark else "Switch to dark mode"
+        self.theme_button.setAccessibleName(label)
+        self.theme_button.setToolTip(label)
+        self.theme_button.update()
 
     def _quick(self, tile_id):
         self.ctx.send(home_vm.tile_request(tile_id, self.ctx.status))
@@ -105,6 +120,7 @@ class TrayPanel(QWidget):
         if not self.popup:                      # embedded: square corners show the page
             paint.box(p, self.rect(), 0, token("bg"))
         paint.box(p, self.rect(), 18, token("card"), token("control_border"))
+        paint.box(p, QRectF(self.strip.geometry()), 12, token("stage"))
         if self.strip.on:
             r = QRectF(self.strip.bar_rect()).translated(self.strip.pos())
             level = self.ctx.status.brightness

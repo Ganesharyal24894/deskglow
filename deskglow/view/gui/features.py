@@ -1,35 +1,12 @@
-"""App-side features that live in the GUI process: start at login, the global
-shortcut, and the theme. Each degrades to a disabled toggle with a reason."""
+"""App-side features that live in the GUI process: start at login and the
+global shortcut. Each degrades to a disabled toggle with a reason. (The theme
+lives in themer.ThemeSwitch, on the context.)"""
 from PySide6.QtCore import QObject, Qt, Signal
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import QApplication
 
-from . import theme
-from .style import stylesheet
 from .vm.settings import HOTKEY, Capability
 
 NO_HOTKEY = "Not available on this desktop"
 HOTKEY_REFUSED = "This desktop doesn't allow global shortcuts"
-
-
-def system_is_dark():
-    try:
-        return QGuiApplication.styleHints().colorScheme() != Qt.ColorScheme.Light
-    except Exception:
-        return True
-
-
-def restyle(app=None):
-    """Re-apply the palette (and accent) to every widget."""
-    app = app or QApplication.instance()
-    if app is None:
-        return
-    app.setStyleSheet(stylesheet(theme.current()))
-    for w in app.allWidgets():
-        refresh = getattr(w, "apply_theme", None)
-        if refresh is not None:
-            refresh()
-        w.update()
 
 
 class Features(QObject):
@@ -39,7 +16,6 @@ class Features(QObject):
         super().__init__(parent)
         self.ctx, self.services = ctx, services
         self._hotkey, self._registered = None, False
-        self._theme_pref = None
         self.hotkey_pressed.connect(lambda: ctx.send({"cmd": "toggle"}),
                                     Qt.ConnectionType.QueuedConnection)
         ctx.status_changed.connect(self._follow)
@@ -100,21 +76,11 @@ class Features(QObject):
                 pass
         self._registered = False
 
-    # ---- theme -----------------------------------------------------------------
-
-    def apply_theme(self, preference):
-        self._theme_pref = preference
-        if theme.set_current(theme.resolve(preference, system_is_dark())):
-            restyle()
-
     def _follow(self, status):
         if not status.reachable:
             return
         if self.ctx.hotkey.available:
             self.apply_hotkey(status.flag("hotkey_on"))
-        pref = status.get("theme", "system")
-        if pref != self._theme_pref:
-            self.apply_theme(pref)
 
     def shutdown(self):
         self._unregister()

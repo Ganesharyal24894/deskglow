@@ -5,6 +5,7 @@ import logging
 from PySide6.QtCore import QObject, Signal
 
 from .accent import set_accent
+from .themer import ThemeSwitch
 from .vm.settings import Capability
 from .vm.status import StatusView
 
@@ -27,6 +28,7 @@ class AppContext(QObject):
         self.tray_available = False
         self.last_error = ""
         poller.updated.connect(self._on_status)
+        self.theme = ThemeSwitch(self, self)
 
     # ---- daemon ------------------------------------------------------------
 

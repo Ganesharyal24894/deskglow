@@ -1,9 +1,11 @@
-"""The shared sidebar: logo, navigation, and the strip's connection card."""
+"""The shared sidebar: logo, navigation, the Dark mode switch, and the
+strip's connection card."""
 from PySide6.QtCore import QRectF, Signal
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
-from .. import fonts, icons, paint
+from .. import fonts, icons, paint, theme
 from ..widgets.base import Card, Text, token
+from ..widgets.controls import Toggle
 from ..widgets.glow import BrandMark
 from ..widgets.tiles import NavItem
 
@@ -36,6 +38,34 @@ class Glyph(QWidget):
         p = paint.begin(self)
         icons.draw(p, 0, 0, self.width(), self.markup, token(self.colour))
         p.end()
+
+
+class DarkModeRow(QWidget):
+    """Moon (dark) / sun (light) icon, "Dark mode", and a 44x26 switch showing
+    the theme on screen. Clicking asks `flip` to switch."""
+
+    def __init__(self, flip=None, parent=None):
+        super().__init__(parent)
+        self.setFixedHeight(44)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(12, 0, 6, 0)
+        row.setSpacing(10)
+        self.icon = Glyph(icons.MOON, "muted", 18)
+        row.addWidget(self.icon)
+        row.addWidget(Text("Dark mode", fonts.sans(14, 500), "muted"), 1)
+        self.switch = Toggle(width=44, height=26)
+        self.switch.setAccessibleName("Dark mode")
+        row.addWidget(self.switch)
+        if flip is not None:
+            self.switch.clicked.connect(lambda _on: flip())
+        self.apply_theme()
+
+    def apply_theme(self):
+        dark = theme.current().name == "dark"
+        self.switch.setChecked(dark)
+        self.icon.markup = icons.MOON if dark else icons.SUN
+        self.icon.update()
+        self.switch.update()
 
 
 class DeviceCard(Card):
@@ -73,7 +103,7 @@ class DeviceCard(Card):
 class Sidebar(QWidget):
     picked = Signal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, theme_switch=None, parent=None):
         super().__init__(parent)
         self.setFixedWidth(216)
         col = QVBoxLayout(self)
@@ -85,7 +115,7 @@ class Sidebar(QWidget):
         brand.addWidget(self.brand)
         col.addLayout(brand)
         nav = QVBoxLayout()
-        nav.setSpacing(4)
+        nav.setSpacing(2)                   # 4px gaps: each NavItem has 2px shadow room
         self.items = {}
         for pid, label, icon in PAGES:
             item = NavItem(pid, label, icon)
@@ -94,8 +124,15 @@ class Sidebar(QWidget):
             self.items[pid] = item
         col.addLayout(nav)
         col.addStretch(1)
+        bottom = QVBoxLayout()
+        bottom.setSpacing(10)
+        self.dark_mode = DarkModeRow(theme_switch.flip if theme_switch is not None else None)
+        bottom.addWidget(self.dark_mode)
         self.card = DeviceCard()
-        col.addWidget(self.card)
+        bottom.addWidget(self.card)
+        col.addLayout(bottom)
+        if theme_switch is not None:
+            theme_switch.changed.connect(self.dark_mode.apply_theme)
 
     def set_active(self, page_id):
         for pid, item in self.items.items():
@@ -103,6 +140,6 @@ class Sidebar(QWidget):
 
     def paintEvent(self, _e):
         p = paint.begin(self)
-        paint.box(p, self.rect(), 0, token("bg"))
+        paint.box(p, self.rect(), 0, token("side"))
         paint.box(p, QRectF(self.width() - 1, 0, 1, self.height()), 0, token("rule"))
         p.end()

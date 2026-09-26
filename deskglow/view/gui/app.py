@@ -8,7 +8,7 @@ from ...controller.settings import SettingsStore
 from . import fonts, theme
 from .bridge import ThreadBridge
 from .context import AppContext
-from .features import Features, restyle
+from .features import Features
 from .poller import StatusPoller
 from .screens.effects import EffectsPage
 from .screens.focus import FocusPage
@@ -18,6 +18,7 @@ from .screens.setup import SetupPage
 from .screens.sync import SyncPage
 from .screens.tray import TrayPanel
 from .style import stylesheet
+from .themer import restyle
 from .tray import Tray
 from .window import MainWindow
 
@@ -63,6 +64,7 @@ class UI:
 
     def shutdown(self):
         self.poller.stop()
+        self.ctx.theme.stop()
         self.features.shutdown()
         if self.tray is not None:
             self.tray.hide()

@@ -14,9 +14,12 @@ QSlider::add-page:horizontal {{ height: 4px; border-radius: 2px; background: {p.
 QSlider::handle:horizontal {{ width: 16px; height: 16px; margin: -6px 0; border-radius: 8px;
     background: {p.text}; }}
 QSlider::handle:horizontal:hover {{ background: {p.strong}; }}
+QSlider#stage::groove:horizontal, QSlider#stage::add-page:horizontal {{
+    background: {p.stage_groove}; }}
+QSlider#stage::sub-page:horizontal, QSlider#stage::handle:horizontal {{ background: {p.stage_text}; }}
 QLineEdit {{ height: 44px; padding: 0 12px; background: {p.inset}; color: {p.text};
     border: 1px solid {p.control_border}; border-radius: 10px;
-    selection-background-color: {p.seg_on}; }}
+    selection-background-color: {p.control_border}; }}
 QLineEdit:focus {{ border: 1px solid {p.muted}; }}
 QMenu {{ background: {p.card}; color: {p.text}; border: 1px solid {p.control_border};
     padding: 4px; border-radius: 8px; }}

@@ -3,7 +3,7 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QBrush, QFontMetricsF, QLinearGradient, QPainterPath
 from PySide6.QtWidgets import QAbstractButton, QSizePolicy
 
-from .. import fonts, icons, paint
+from .. import fonts, icons, paint, theme
 from .base import token
 
 TOP_LEFT_WRAP = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap
@@ -35,21 +35,23 @@ class _Tile(QAbstractButton):
 
 
 class NavItem(_Tile):
-    """Sidebar link: icon + label; the active one gets an accent edge."""
+    """Sidebar link: icon + label; the active one gets an accent edge. The item
+    is 44px; the widget is 2px taller so the light theme's shadow shows."""
 
     def __init__(self, page_id, label, icon, parent=None):
         super().__init__(parent)
         self.page_id, self.icon = page_id, icon
         self.setText(label)
-        self.setFixedHeight(44)
+        self.setFixedHeight(46)
         self.setFont(fonts.sans(14, 500))
 
     def paintEvent(self, _e):
         p = paint.begin(self)
-        r = QRectF(self.rect())
+        r = QRectF(0, 0, self.width(), 44)
         colour = token("strong" if self.active else "muted")
         if self.active:
-            paint.box(p, r, 10, token("raised"))
+            paint.soft_shadow(p, r, 10, theme.SHADOW, theme.current().nav_shadow)
+            paint.box(p, r, 10, token("nav_active"))
             clip = QPainterPath()
             clip.addRoundedRect(r, 10, 10)
             p.setClipPath(clip)

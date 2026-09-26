@@ -70,15 +70,12 @@ def test_tray_status_line():
     assert tray.menu_power_label(StatusView(status())) == "Turn off"
 
 
-def test_theme_registry_falls_back_to_dark_until_a_light_palette_exists(monkeypatch):
+def test_theme_registry_resolves_the_preference():
     assert theme.resolve("dark") is theme.DARK
-    assert theme.resolve("light") is theme.DARK
-    assert theme.resolve("system", system_dark=False) is theme.DARK
-    light = theme.Palette(**{**theme.DARK.__dict__, "name": "light", "bg": "#FFFFFF"})
-    monkeypatch.setitem(theme.PALETTES, "light", light)
-    assert theme.resolve("light") is light
-    assert theme.resolve("system", system_dark=False) is light
+    assert theme.resolve("light") is theme.LIGHT
+    assert theme.resolve("system", system_dark=False) is theme.LIGHT
     assert theme.resolve("system", system_dark=True) is theme.DARK
+    assert theme.resolve("neon") is theme.DARK
 
 
 def test_set_current_reports_changes():

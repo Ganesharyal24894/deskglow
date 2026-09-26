@@ -44,7 +44,7 @@ class CandidateRow(QAbstractButton):
             bh = QFontMetricsF(badge_f).height() + 4
             b = QRectF(bx, top + (nh - bh) / 2, bw, bh)
             paint.box(p, b, 10, token("badge_bg"))
-            paint.text(p, b, "Most likely", badge_f, token("accent_ink"), Qt.AlignmentFlag.AlignCenter)
+            paint.text(p, b, "Most likely", badge_f, token("badge_text"), Qt.AlignmentFlag.AlignCenter)
         paint.text(p, QRectF(x, top + nh + 2, 260, ah), self.row.address, addr_f,
                    token("muted"), LEFT)
         right = r.width() - 17

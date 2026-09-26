@@ -10,7 +10,7 @@ from .status import PHASE_COLOURS
 STEPPERS = (("work", "Focus", 5, " min"), ("break", "Break", 1, " min"), ("rounds", "Rounds", 1, ""))
 CUES = (("Focus", "Steady calm cyan", PHASE_COLOURS["focus"], 1.0),
         ("Break", "Soft green", PHASE_COLOURS["break"], 1.0),
-        ("Last minute", "Gently breathes", "focus_label", 0.55),   # palette token
+        ("Last minute", "Gently breathes", "#5CC6E8", 0.55),
         ("Done", "Settles on lavender", PHASE_COLOURS["done"], 1.0))
 PHASE_LABELS = {"focus": "FOCUS", "break": "BREAK", "done": "DONE"}
 

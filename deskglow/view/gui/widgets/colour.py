@@ -24,7 +24,7 @@ class SwatchButton(QAbstractButton):
             paint.box(p, self.rect(), 12, self.colour, token("swatch_ring"), 2.0)
             if self.inset_ring:                           # inset 0 0 0 3px ring
                 inner = QRectF(self.rect()).adjusted(2, 2, -2, -2)
-                paint.box(p, inner, 10, None, token("bg"), 3.0)
+                paint.box(p, inner, 10, None, token("card"), 3.0)
         else:
             paint.box(p, self.rect(), 12, self.colour, token("control_border"))
         p.end()
@@ -100,7 +100,9 @@ class HueRing(QWidget):
         paint.glow(p, dot, 26, self.colour, self.glow, 18, 2)
         paint.box(p, dot, 26, self.colour)
         dx, dy = hue.marker_centre(hue.angle_for(self.colour))
-        paint.box(p, QRectF(64 + dx - 8, 64 + dy - 8, 16, 16), 8, None, token("strong"), 3.0)
+        marker = QRectF(64 + dx - 8, 64 + dy - 8, 16, 16)
+        paint.box(p, marker.adjusted(-1, -1, 1, 1), 9, None, "#40000000", 1.0)  # 0 0 0 1px .25
+        paint.box(p, marker, 8, None, "#FFFFFF", 3.0)
         p.end()
 
     def _pick(self, pos):

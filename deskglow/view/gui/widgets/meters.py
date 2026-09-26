@@ -72,7 +72,7 @@ class MonitorDiagram(QWidget):
             on = b.name in self.lit
             if on:
                 paint.glow(p, r, 8, self.glow_colour, 0.35, 20, 0)
-            paint.box(p, r, 8, token("tile"), token("accent_ink" if on else "control_border"), 2.0)
+            paint.box(p, r, 8, token("monitor"), token("accent_ink" if on else "control_border"), 2.0)
             name_f, res_f = fonts.sans(12, 600), fonts.sans(11)
             mid = r.center().y()
             paint.text(p, QRectF(r.left(), mid - 16, r.width(), 16), b.name, name_f,
@@ -110,7 +110,7 @@ class LevelMeter(QWidget):
             bh = inner.height() * h
             p.setOpacity(0.35 + h * 100 / 160.0)
             paint.box(p, QRectF(inner.left() + i * (w + 5), inner.bottom() - bh, w, bh), 3,
-                      token("accent"))
+                      token("accent_ink"))
         p.end()
 
 

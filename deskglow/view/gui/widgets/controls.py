@@ -3,18 +3,17 @@ from PySide6.QtCore import QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QFontMetricsF
 from PySide6.QtWidgets import QAbstractButton, QSlider, QWidget
 
-from .. import fonts, paint
+from .. import fonts, paint, theme
 from .base import token
 
 
 class Toggle(QAbstractButton):
-    """The design's 48x28 switch."""
+    """The design's switch: 48x28 (44x26 in the sidebar), accent_ink when on."""
 
-    def __init__(self, parent=None, fill="accent"):
+    def __init__(self, parent=None, width=48, height=28):
         super().__init__(parent)
-        self.fill = fill
         self.setCheckable(True)
-        self.setFixedSize(48, 28)
+        self.setFixedSize(width, height)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def paintEvent(self, _e):
@@ -22,8 +21,12 @@ class Toggle(QAbstractButton):
         if not self.isEnabled():
             p.setOpacity(0.4)
         on = self.isChecked()
-        paint.box(p, self.rect(), 14, token(self.fill if on else "control_border"))
-        paint.box(p, QRectF(23 if on else 3, 3, 22, 22), 11, token("on_accent" if on else "knob_off"))
+        w, h = self.width(), self.height()
+        paint.box(p, self.rect(), h / 2, token("accent_ink" if on else "control_border"))
+        k = h - 6
+        knob = QRectF(w - 3 - k if on else 3, 3, k, k)
+        paint.glow(p, knob.translated(0, 1), k / 2, "#000000", 0.25, 2)   # 0 1px 2px
+        paint.box(p, knob, k / 2, token("knob_on" if on else "knob_off"))
         p.end()
 
 
@@ -53,6 +56,8 @@ class Segmented(QWidget):
         policy.setVerticalPolicy(policy.Policy.Fixed)
         self.setSizePolicy(policy)
         self.setMinimumHeight(self.heightForWidth(10000))
+        if style != "chips" and not equal:
+            self.setMinimumWidth(self.sizeHint().width())     # never clip an option
 
     def set_options(self, options, current=None):
         self.options = list(options)
@@ -122,6 +127,8 @@ class Segmented(QWidget):
                 paint.box(p, r, self.h / 2, token("tile_active") if on else None,
                           token("accent_ink" if on else "control_border"))
             elif on:
+                lift = theme.current().seg_shadow
+                paint.soft_shadow(p, r, self.radius, theme.SHADOW, lift)
                 paint.box(p, r, self.radius, token("seg_on"))
             paint.text(p, r, label, self.font(), token("strong" if on else "muted"),
                        Qt.AlignmentFlag.AlignCenter)

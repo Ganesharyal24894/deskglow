@@ -51,6 +51,7 @@ class SettingsPage(Page):
         self.about["github"].clicked.connect(lambda: self.open_url(QUrl(PROJECT_URL)))
         ctx.status_changed.connect(self.show_status)
         ctx.local_changed.connect(lambda: self.show_status(ctx.status))
+        ctx.theme.changed.connect(self._show_theme)
 
     def open_url(self, url):
         QDesktopServices.openUrl(url)
@@ -85,9 +86,7 @@ class SettingsPage(Page):
         self.ctx.send(vm.toggle_request(toggle_id, on))
 
     def _theme(self, theme_id):
-        if self.features is not None:
-            self.features.apply_theme(theme_id)
-        self.ctx.send(vm.theme_request(theme_id))
+        self.ctx.theme.choose(theme_id)
 
     def show_status(self, s):
         st = self.strip
@@ -102,4 +101,7 @@ class SettingsPage(Page):
         rows = vm.rows(s, self.ctx.login, self.ctx.hotkey, self.ctx.tray_available)
         for data in rows:
             self.toggles[data.id].show(data)
-        self.themes.set_current(s.get("theme", "system"))
+        self._show_theme()
+
+    def _show_theme(self):
+        self.themes.set_current(self.ctx.theme.pref or "system")

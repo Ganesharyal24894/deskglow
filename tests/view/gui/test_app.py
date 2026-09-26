@@ -57,6 +57,24 @@ def test_a_new_strip_colour_restyles_the_app(ui, monkeypatch):
     assert brand.graphicsEffect().color().name().upper() == "#3DDC97"
 
 
+def test_flipping_the_theme_rethemes_every_open_window(qtbot, ui):
+    from PySide6.QtCore import Qt
+
+    from deskglow.view.gui import icons, theme
+    ui.window.show()
+    qtbot.mouseClick(ui.window.shell.sidebar.dark_mode.switch, Qt.MouseButton.LeftButton)
+    assert ui.client.status["theme"] == "light" and theme.current() is theme.LIGHT
+    assert ui.panel.theme_button.icon_markup == icons.MOON          # the tray panel too
+    assert ui.pages["settings"].themes.current == "light"
+    assert ui.pages["focus"].primary.fill_override == "#1C7FA3"
+    home = ui.pages["home"]
+    ui.window.go("home")
+    img = ui.window.grab().toImage()
+    stage = home.preview.mapTo(ui.window, home.preview.rect().bottomLeft())
+    assert img.pixelColor(stage.x() + 12, stage.y() - 12).lightness() < 40, "the stage stays dark"
+    assert img.pixelColor(ui.window.width() - 8, 8).name().upper() == theme.LIGHT.bg
+
+
 def test_quit_stops_everything(ui, monkeypatch):
     quits = []
     monkeypatch.setattr(ui.app, "quit", lambda: quits.append(1))

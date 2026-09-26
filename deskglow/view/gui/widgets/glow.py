@@ -3,7 +3,7 @@ from PySide6.QtCore import QRectF, Qt
 from PySide6.QtGui import QPainterPath
 from PySide6.QtWidgets import QGraphicsDropShadowEffect, QHBoxLayout, QVBoxLayout, QWidget
 
-from .. import fonts, paint
+from .. import fonts, paint, theme
 from ..accent import accent
 from .base import Text, token
 
@@ -74,7 +74,7 @@ class StripPreview(QWidget):
 
     def paintEvent(self, _e):
         p = paint.begin(self)
-        paint.box(p, self.rect(), 20, token("card"), token("card_border"))
+        paint.box(p, self.rect(), 20, token("stage"), token("stage_line"))
         clip = QPainterPath()
         clip.addRoundedRect(QRectF(self.rect()).adjusted(1, 1, -1, -1), 19, 19)
         p.setClipPath(clip)
@@ -87,25 +87,30 @@ class StripPreview(QWidget):
             p.setOpacity(opacity)
             paint.box(p, self.bar_rect(), 7, c)
         else:
-            paint.box(p, self.bar_rect(), 7, token("control_border"))
+            paint.box(p, self.bar_rect(), 7, token("strip_off"))
         p.end()
 
 
 class TrayStrip(QWidget):
-    """The tray panel's 10px strip (margin 6px 4px). Its glow spills over the
-    neighbouring rows, so the panel paints it underneath (see glow_rect)."""
+    """The tray panel's 10px strip on its stage (padding: the palette's tray_pad;
+    the stage is only visible in light mode). Its glow spills over the
+    neighbouring rows, so the panel paints stage and glow underneath."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(22)
         self.on = True
+        self.apply_theme()
+
+    def apply_theme(self):
+        self.setFixedHeight(10 + 2 * theme.current().tray_pad[1])
 
     def bar_rect(self):
-        return QRectF(4, 6, self.width() - 8, 10)
+        x, y = theme.current().tray_pad
+        return QRectF(x, y, self.width() - 2 * x, 10)
 
     def paintEvent(self, _e):
         p = paint.begin(self)
-        paint.box(p, self.bar_rect(), 5, accent() if self.on else token("control_border"))
+        paint.box(p, self.bar_rect(), 5, accent() if self.on else token("strip_off"))
         p.end()
 
 

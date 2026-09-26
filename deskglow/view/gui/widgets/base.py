@@ -4,21 +4,20 @@ from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QFontMetricsF
 from PySide6.QtWidgets import QAbstractButton, QLabel, QWidget
 
-from ....model.color import from_hex, to_hex
 from .. import fonts, icons, paint, theme
 from ..accent import accent
 
 
 def token(name):
-    """A palette colour by token name, the accent for "accent", or a literal #hex."""
+    """A palette colour by token name, the accent for "accent", or a literal #hex.
+    A palette value that names another token is followed."""
     if name.startswith("#"):
         return name
     if name == "accent":
         return accent()
     if name == "accent_ink":
-        k = theme.current().ink_scale
-        return to_hex(tuple(c * k for c in from_hex(accent())))
-    return getattr(theme.current(), name)
+        return theme.ink(accent(), theme.current().ink_scale)
+    return token(getattr(theme.current(), name))
 
 
 class Text(QLabel):
@@ -58,7 +57,7 @@ KINDS = {
     "raised": ("raised", "control_border", "text"),
     "ghost": (None, "control_border", "muted"),
     "outline": (None, "control_border", "text"),
-    "primary": ("accent", "accent", "on_accent"),
+    "primary": ("accent", "primary_border", "on_accent"),
     "danger": (None, "danger_border", "danger_text"),
     "link": (None, None, "muted"),
     "plain": (None, None, "text"),
@@ -74,7 +73,7 @@ class Button(QAbstractButton):
         self.setText(text)
         self.kind, self.radius, self.pad, self.min_width = kind, radius, pad, min_width
         self.icon_markup, self.icon_size, self.icon_stroke = icon, icon_size, 1.8
-        self.fill_override = self.text_override = None
+        self.fill_override = self.text_override = self.border_override = None
         self.setFont(font or fonts.sans(14, 500))
         self.setFixedHeight(height)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -82,6 +81,7 @@ class Button(QAbstractButton):
     def colours(self):
         fill, border, text = KINDS[self.kind]
         fill = self.fill_override or fill
+        border = self.border_override or border
         return (token(fill) if fill else None, token(border) if border else None,
                 token(self.text_override or text))
 

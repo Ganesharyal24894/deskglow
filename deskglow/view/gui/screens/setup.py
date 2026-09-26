@@ -1,8 +1,8 @@
 """First-run Setup: the daemon scans for strips; pick one (or type an address)."""
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QRectF, Qt, QTimer
 from PySide6.QtWidgets import QButtonGroup, QHBoxLayout, QLineEdit, QVBoxLayout, QWidget
 
-from .. import fonts, icons, paint
+from .. import fonts, icons, paint, theme
 from ..vm import setup as vm
 from ..widgets.base import Button, Text, token
 from ..widgets.candidate import CandidateRow
@@ -43,7 +43,8 @@ class SetupPage(QWidget):
         self.ctx, self.rows, self.scanning = ctx, [], False
         outer = QVBoxLayout(self)
         outer.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        box, lay = card(36, 22, 24)
+        self.box = box = card(36, 22, 24)[0]
+        lay = box.layout()
         box.setFixedWidth(540)
         outer.addWidget(box)
         lay.addWidget(BrandMark(18, (30, 9), 22))
@@ -90,6 +91,13 @@ class SetupPage(QWidget):
         self.manual.textChanged.connect(lambda _t: self._update_use())
         self.cancel.clicked.connect(lambda: ctx.navigate.emit("home"))
         self.use.clicked.connect(self._use)
+
+    def paintEvent(self, _e):
+        """The card's soft shadow (0 12px 40px, light theme only)."""
+        p = paint.begin(self)
+        r = QRectF(self.box.geometry()).translated(0, 12)
+        paint.glow(p, r, 24, theme.SHADOW, theme.current().card_shadow, 40)
+        p.end()
 
     def begin(self, back_allowed=False):
         self.cancel.setVisible(back_allowed)

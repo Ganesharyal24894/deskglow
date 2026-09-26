@@ -2,8 +2,9 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
-from .. import fonts, paint
+from .. import fonts, paint, theme
 from ..vm import focus as vm
+from ..vm.status import PHASE_COLOURS
 from ..widgets.base import Button, Text, token
 from ..widgets.glow import shadow
 from ..widgets.meters import FocusRing
@@ -45,6 +46,15 @@ def stepper(label):
     for w in (minus, value, plus):
         row.addWidget(w)
     return row, minus, value, plus
+
+
+def primary_fill(phase_colour):
+    """The Start/Pause fill: the phase colour, or the palette's focus_primary
+    for the focus phase; light palettes darken the others for white text."""
+    if phase_colour == PHASE_COLOURS["focus"]:
+        return token("focus_primary")
+    scale = theme.current().ink_scale
+    return phase_colour if scale >= 1 else theme.ink(phase_colour, 0.75)
 
 
 class FocusPage(Page):
@@ -117,6 +127,7 @@ class FocusPage(Page):
         self.stop.clicked.connect(self._stop)
         ctx.status_changed.connect(self.show_status)
         self._show_timer()
+        self.apply_theme()
 
     def _step(self, key, direction):
         self.timer = vm.step(self.timer, key, direction)
@@ -141,6 +152,11 @@ class FocusPage(Page):
         self.clock.setText(r.time_text)
         self.round.setText(r.round_text)
         self.primary.setText(vm.primary_button(s)[0])
-        self.primary.fill_override = r.colour
-        self.primary.update()
+        self._phase_colour = r.colour
+        self.apply_theme()
         self.stop.setEnabled(r.running)
+
+    def apply_theme(self):
+        fill = primary_fill(getattr(self, "_phase_colour", PHASE_COLOURS["focus"]))
+        self.primary.fill_override = self.primary.border_override = fill
+        self.primary.update()

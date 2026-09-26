@@ -9,6 +9,7 @@ from ..widgets.controls import Segmented, Slider, Toggle
 from .common import card, h2, small
 
 PROJECT_URL = "https://github.com/Ganesharyal24894/deskglow"
+THEME_DESC = "The sidebar switch flips Dark and Light"
 
 
 def strip_card():
@@ -113,7 +114,13 @@ def app_card():
     theme_row = QHBoxLayout(theme_host)
     theme_row.setContentsMargins(0, 0, 0, 0)
     theme_row.setSpacing(12)
-    theme_row.addWidget(Text("Theme", fonts.sans(14)), 1)
+    col = QVBoxLayout()
+    col.setSpacing(0)
+    col.addStretch(1)
+    col.addWidget(Text("Theme", fonts.sans(14)))
+    col.addWidget(Text(THEME_DESC, fonts.sans(12), "muted", wrap=True))
+    col.addStretch(1)
+    theme_row.addLayout(col, 1)
     themes = Segmented(vm.THEMES, "system", height=34, radius=8, well_radius=10, pad=12)
     theme_row.addWidget(themes)
     lay.addWidget(theme_host)

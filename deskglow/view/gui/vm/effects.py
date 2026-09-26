@@ -3,7 +3,7 @@ gradient preview derived from the effect's name."""
 from dataclasses import dataclass
 
 COLOURS = {"red": "#FF3B30", "green": "#34C759", "blue": "#1E7BFF", "yellow": "#FFD60A",
-           "cyan": "#32D7F0", "magenta": "#E040FB", "white": "#F2F2F2"}
+           "cyan": "#32D7F0", "magenta": "#E040FB", "white": "fx_white"}   # white: a palette token
 SEVEN = [COLOURS[c] for c in ("red", "yellow", "green", "cyan", "blue", "magenta", "white")]
 RGB = [COLOURS["red"], COLOURS["green"], COLOURS["blue"]]
 FILTERS = (("all", "All"), ("fade", "Fade"), ("jump", "Jump"), ("blink", "Blink"))
