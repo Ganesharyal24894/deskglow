@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deskglow home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',sans-serif}
+a{color:inherit}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 1040px; height: 720px; display: flex; background: {{p.bg}}; font-family: 'IBM Plex Sans', sans-serif; color: {{p.text}}; overflow: hidden">
+<dc-import name="Sidebar" active="home" accent="{{accent}}" theme="{{theme}}" on-toggle-theme="{{toggleTheme}}" hint-size="216px,720px"></dc-import>
+<main style="flex-grow: 1; box-sizing: border-box; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px">
+<header style="display: flex; align-items: center; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1">
+<h1 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">Desk strip</h1>
+<div style="font-size: 14px; color: {{p.muted}}">{{stateText}}</div>
+</div>
+<button type="button" style="height: 44px; padding: 0 16px; display: flex; align-items: center; gap: 8px; background: transparent; color: {{p.muted}}; border: 1px solid {{p.line2}}; border-radius: 12px; font: 500 14px 'IBM Plex Sans', sans-serif; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>Reset</button>
+<button type="button" aria-label="Power" aria-pressed="{{on}}" onClick="{{togglePower}}" style="{{powerStyle}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9"></path><path d="M6.3 6.3a8 8 0 1 0 11.4 0"></path></svg>{{powerLabel}}</button>
+</header>
+
+<section aria-label="Strip preview" style="position: relative; height: 176px; box-sizing: border-box; padding: 28px 32px; background: {{p.stage}}; border: 1px solid {{p.stageLine}}; border-radius: 20px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; color: {{p.stageText}}">
+<div style="{{stripStyle}}"></div>
+<div style="display: flex; align-items: center; gap: 16px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{p.stageMuted}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+<label for="bri" style="font-size: 13px; color: {{p.stageMuted}}; width: 74px">Brightness</label>
+<input id="bri" type="range" min="0" max="100" value="{{bri}}" onInput="{{setBri}}" style="flex-grow: 1; height: 24px; accent-color: {{p.stageText}}">
+<div style="width: 52px; text-align: right; font-family: Sora, sans-serif; font-weight: 600; font-size: 18px">{{bri}}%</div>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 20px; flex-grow: 1">
+<section aria-label="Colour" style="box-sizing: border-box; padding: 20px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center">
+<h2 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 15px; flex-grow: 1">Colour</h2>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{p.muted}}">{{hex}}</div>
+</div>
+<div style="display: flex; gap: 18px; align-items: center">
+<div aria-label="Hue ring" style="position: relative; width: 128px; height: 128px; flex-shrink: 0; border-radius: 64px; background: conic-gradient(#ff3b30, #ffcc00, #34c759, #00c7be, #007aff, #af52de, #ff2d55, #ff3b30)">
+<div style="position: absolute; left: 22px; top: 22px; width: 84px; height: 84px; border-radius: 42px; background: {{p.panel}}; display: flex; align-items: center; justify-content: center">
+<div style="width: 52px; height: 52px; border-radius: 26px; background: {{accent}}; box-shadow: 0 0 18px 2px {{glow}}"></div>
+</div>
+<div style="position: absolute; left: 97px; top: 18px; width: 16px; height: 16px; border-radius: 8px; border: 3px solid #FFFFFF; box-sizing: border-box; background: transparent; box-shadow: 0 0 0 1px rgba(0,0,0,0.25)"></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; flex-grow: 1">
+<sc-for list="{{swatches}}" as="s" hint-placeholder-count="8">
+<button type="button" aria-label="{{s.name}}" title="{{s.name}}" onClick="{{s.pick}}" style="{{s.style}}"></button>
+</sc-for>
+</div>
+</div>
+<button type="button" style="height: 44px; background: {{p.btn}}; color: {{p.text}}; border: 1px solid {{p.line2}}; border-radius: 12px; font: 500 14px 'IBM Plex Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Save as favourite</button>
+</section>
+
+<section aria-label="Modes" style="box-sizing: border-box; padding: 20px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 15px">Modes</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; flex-grow: 1">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="6">
+<button type="button" onClick="{{m.pick}}" style="{{m.style}}">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg>
+<span style="font-weight: 600; font-size: 14px; color: {{p.text}}">{{m.label}}</span>
+<span style="font-size: 12px; color: {{p.muted}}; line-height: 1.35">{{m.desc}}</span>
+</button>
+</sc-for>
+</div>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","options":["#FFB46E","#5B8CFF","#FF4D8D","#3DDC97"],"default":"#FFB46E"},"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":1040,"height":720}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { on: true, bri: 80, color: null, mode: 'solid', theme: null }; }
+  renderVals() {
+    const s = this.state;
+    const theme = s.theme ?? this.props.theme ?? 'dark';
+    const dark = theme === 'dark';
+    const PAL = {
+      dark: { bg: '#0F0F12', panel: '#17171C', line: '#25252D', tile: '#1C1C22', btn: '#1F1F26', sel: '#23232B', line2: '#2A2A33', text: '#ECECF1', muted: '#A0A0AD', strong: '#FFFFFF', stage: '#17171C', stageLine: '#25252D', stageText: '#ECECF1', stageMuted: '#A0A0AD', off: '#2A2A33' },
+      light: { bg: '#F4F3EF', panel: '#FFFFFF', line: '#E4E2DC', tile: '#F8F7F4', btn: '#F2F1ED', sel: '#FFFFFF', line2: '#D6D4CD', text: '#1A1A1F', muted: '#5E5E69', strong: '#0E0E12', stage: '#1B1B20', stageLine: '#1B1B20', stageText: '#F2F2F5', stageMuted: '#B4B4C0', off: '#3A3A42' },
+    };
+    const p = PAL[theme];
+    const accent = s.color ?? this.props.accent ?? '#FFB46E';
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
+    const ink = dark ? accent : 'rgb(' + Math.round(r * 0.55) + ',' + Math.round(g * 0.55) + ',' + Math.round(b * 0.55) + ')';
+    const a = s.on ? 0.25 + 0.6 * (s.bri / 100) : 0;
+    const glow = 'rgba(' + r + ',' + g + ',' + b + ',' + a.toFixed(2) + ')';
+    const names = { '#FFB46E': 'Warm white', '#FFFFFF': 'White', '#FF3B30': 'Red', '#FF7A1A': 'Orange', '#3DDC97': 'Mint', '#00B8C7': 'Teal', '#5B8CFF': 'Blue', '#B35CFF': 'Violet', '#FF4D8D': 'Pink' };
+    const list = ['#FFB46E', '#FFFFFF', '#FF3B30', '#FF7A1A', '#3DDC97', '#00B8C7', '#5B8CFF', '#B35CFF'];
+    const swatches = list.map((c) => ({
+      name: names[c],
+      pick: () => this.setState({ color: c, mode: 'solid', on: true }),
+      style: 'height:44px;border-radius:12px;cursor:pointer;background:' + c + ';border:' + (c === accent ? '2px solid ' + p.strong + ';box-shadow:0 0 0 3px ' + p.panel + ' inset' : '1px solid ' + p.line2) + ';',
+    }));
+    const tile = 'display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:14px;cursor:pointer;text-align:left;font-family:inherit;';
+    const modeDefs = [
+      { id: 'screen', label: 'Screen sync', desc: 'Match what is on your monitor', icon: 'M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 20h8M12 16v4' },
+      { id: 'audio', label: 'Music', desc: 'Pulse to system sound or mic', icon: 'M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z' },
+      { id: 'calm', label: 'Calm', desc: 'Soft colours drift and breathe', icon: 'M2 12c2.5-4 5-4 7.5 0s5 4 7.5 0 3.5-2.7 5-2' },
+      { id: 'circadian', label: 'Circadian', desc: 'White that warms after sunset', icon: 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4' },
+      { id: 'effects', label: 'Effects', desc: 'Built-in jump, fade and blink', icon: 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6' },
+      { id: 'focus', label: 'Focus', desc: 'Pomodoro timer in light', icon: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 9v4l2.5 2M9 2h6' },
+    ];
+    const modes = modeDefs.map((m) => ({
+      ...m,
+      pick: () => this.setState({ mode: m.id, on: true }),
+      style: tile + (s.mode === m.id
+        ? 'background:' + p.sel + ';color:' + ink + ';border:1px solid ' + ink + ';'
+        : 'background:' + p.tile + ';color:' + p.muted + ';border:1px solid ' + p.line + ';'),
+    }));
+    const modeName = s.mode === 'solid' ? (names[accent] ?? 'Custom colour') : modeDefs.find((m) => m.id === s.mode).label;
+    return {
+      p, theme, accent, glow, swatches, modes, bri: s.bri, on: s.on ? 'true' : 'false', hex: accent.toUpperCase(),
+      toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }),
+      stateText: s.on ? modeName + ' · ' + s.bri + '%' : 'Off',
+      powerLabel: s.on ? 'On' : 'Off',
+      togglePower: () => this.setState({ on: !s.on }),
+      setBri: (e) => this.setState({ bri: Number(e.target.value) }),
+      powerStyle: 'height:44px;min-width:92px;padding:0 18px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;cursor:pointer;font:600 14px \'IBM Plex Sans\',sans-serif;' + (s.on
+        ? 'background:' + accent + ';color:#141413;border:1px solid ' + (dark ? accent : ink) + ';box-shadow:0 0 22px ' + glow + ';'
+        : 'background:' + p.btn + ';color:' + p.text + ';border:1px solid ' + p.line2 + ';'),
+      stripStyle: 'height:14px;border-radius:7px;margin-top:18px;background:' + (s.on ? accent : p.off) + ';opacity:' + (s.on ? (0.35 + 0.65 * s.bri / 100).toFixed(2) : '1') + ';box-shadow:0 0 36px 10px ' + glow + ',0 0 90px 24px ' + glow + ';',
+    };
+  }
+}
+</script>
+</body>
+</html>

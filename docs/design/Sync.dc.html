@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deskglow sync</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',sans-serif}
+a{color:inherit}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 1040px; height: 720px; display: flex; background: {{p.bg}}; font-family: 'IBM Plex Sans', sans-serif; color: {{p.text}}; overflow: hidden">
+<dc-import name="Sidebar" active="sync" accent="{{accent}}" theme="{{theme}}" on-toggle-theme="{{toggleTheme}}" hint-size="216px,720px"></dc-import>
+<main style="flex-grow: 1; box-sizing: border-box; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px">
+<header style="display: flex; flex-direction: column; gap: 2px">
+<h1 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">Sync</h1>
+<div style="font-size: 14px; color: {{p.muted}}">Let the strip follow your screen or your music.</div>
+</header>
+<div style="display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; flex-grow: 1">
+
+<section aria-label="Screen sync" style="box-sizing: border-box; padding: 22px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{p.text}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 20h8M12 16v4"></path></svg>
+<h2 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 17px; flex-grow: 1">Screen sync</h2>
+<span style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{p.muted}}"><span style="width: 14px; height: 14px; border-radius: 4px; background: #4A7BFF; box-shadow: 0 0 10px #4A7BFF"></span>#4A7BFF · 15 fps</span>
+</div>
+<div style="display: flex; align-items: flex-end; justify-content: center; gap: 12px; height: 128px; padding: 12px; background: {{p.inset}}; border-radius: 14px">
+<button type="button" onClick="{{pickDp}}" style="{{dpStyle}}"><span style="font-size: 12px; font-weight: 600">DP-1</span><span style="font-size: 11px; color: {{p.muted}}">2560 × 1440</span></button>
+<button type="button" onClick="{{pickHdmi}}" style="{{hdmiStyle}}"><span style="font-size: 12px; font-weight: 600">HDMI-1</span><span style="font-size: 11px; color: {{p.muted}}">1920 × 1080</span></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: {{p.muted}}">Which screen</div>
+<div role="group" aria-label="Which screen" style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{targets}}" as="t" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: {{p.muted}}">Colour style</div>
+<div role="group" aria-label="Colour style" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; background: {{p.inset}}; border-radius: 12px">
+<sc-for list="{{styles}}" as="st" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{st.pressed}}" onClick="{{st.pick}}" style="{{st.style}}">{{st.label}}</button>
+</sc-for>
+</div>
+<div style="font-size: 13px; color: {{p.muted}}; line-height: 1.4">{{styleDesc}}</div>
+</div>
+<div style="flex-grow: 1"></div>
+<button type="button" style="height: 46px; border-radius: 12px; border: {{primaryBorder}}; cursor: pointer; background: {{accent}}; color: #141413; font: 600 14px 'IBM Plex Sans', sans-serif">Start screen sync</button>
+</section>
+
+<section aria-label="Music" style="box-sizing: border-box; padding: 22px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{p.text}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"></path></svg>
+<h2 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 17px">Music</h2>
+</div>
+<div aria-label="Input level" style="display: flex; align-items: flex-end; gap: 5px; height: 128px; padding: 12px 14px; box-sizing: border-box; background: {{p.inset}}; border-radius: 14px">
+<sc-for list="{{meter}}" as="m" hint-placeholder-count="18">
+<div style="{{m}}"></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: {{p.muted}}">Listen to</div>
+<div role="group" aria-label="Listen to" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; background: {{p.inset}}; border-radius: 12px">
+<sc-for list="{{sources}}" as="so" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{so.pressed}}" onClick="{{so.pick}}" style="{{so.style}}">{{so.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="sens" style="font-size: 13px; color: {{p.muted}}">Sensitivity</label>
+<input id="sens" type="range" min="1" max="100" value="60" style="height: 24px; accent-color: {{p.text}}">
+</div>
+<div style="flex-grow: 1"></div>
+<button type="button" style="height: 46px; border-radius: 12px; cursor: pointer; background: {{p.btn}}; color: {{p.text}}; border: 1px solid {{p.line2}}; font: 600 14px 'IBM Plex Sans', sans-serif">Start music sync</button>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","options":["#FFB46E","#5B8CFF","#FF4D8D","#3DDC97"],"default":"#FFB46E"},"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":1040,"height":720}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { target: 'focus', style: 'vivid', source: 'system', theme: null }; }
+  renderVals() {
+    const s = this.state;
+    const theme = s.theme ?? this.props.theme ?? 'dark';
+    const dark = theme === 'dark';
+    const PAL = {
+      dark: { bg: '#0F0F12', panel: '#17171C', line: '#25252D', tile: '#1C1C22', btn: '#1F1F26', sel: '#23232B', line2: '#2A2A33', inset: '#111115', segOn: '#2A2A33', segShadow: 'none', text: '#ECECF1', muted: '#A0A0AD', strong: '#FFFFFF' },
+      light: { bg: '#F4F3EF', panel: '#FFFFFF', line: '#E4E2DC', tile: '#FFFFFF', btn: '#F2F1ED', sel: '#FFFFFF', line2: '#D6D4CD', inset: '#F2F1ED', segOn: '#FFFFFF', segShadow: '0 1px 2px rgba(20,20,30,0.12)', text: '#1A1A1F', muted: '#5E5E69', strong: '#0E0E12' },
+    };
+    const p = PAL[theme];
+    const accent = this.props.accent ?? '#FFB46E';
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
+    const ink = dark ? accent : 'rgb(' + Math.round(r * 0.55) + ',' + Math.round(g * 0.55) + ',' + Math.round(b * 0.55) + ')';
+    const seg = (on) => 'height:36px;border-radius:9px;border:0;cursor:pointer;font:500 13px \'IBM Plex Sans\',sans-serif;' + (on ? 'background:' + p.segOn + ';color:' + p.strong + ';box-shadow:' + p.segShadow + ';' : 'background:transparent;color:' + p.muted + ';');
+    const chip = (on) => 'height:36px;padding:0 14px;border-radius:18px;cursor:pointer;font:500 13px \'IBM Plex Sans\',sans-serif;' + (on ? 'background:' + p.sel + ';color:' + p.strong + ';border:1px solid ' + ink + ';' : 'background:transparent;color:' + p.muted + ';border:1px solid ' + p.line2 + ';');
+    const lit = (id) => s.target === id || s.target === 'all' || (s.target === 'focus' && id === 'DP-1');
+    const mon = (id, w, h) => 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:' + w + 'px;height:' + h + 'px;border-radius:8px;cursor:pointer;color:' + p.text + ';font-family:inherit;background:' + p.tile + ';' + (lit(id) ? 'border:2px solid ' + ink + ';box-shadow:0 0 20px rgba(74,123,255,0.35);' : 'border:2px solid ' + p.line2 + ';');
+    const targets = [['focus', 'Focused window'], ['all', 'All screens'], ['DP-1', 'DP-1'], ['HDMI-1', 'HDMI-1']].map(([id, label]) => ({ label, pressed: s.target === id ? 'true' : 'false', pick: () => this.setState({ target: id }), style: chip(s.target === id) }));
+    const descs = { average: 'Mean colour of the whole screen. Calm and muted.', vivid: 'Favours the most colourful pixels, so small bright areas still show.', dominant: 'The most common hue, rendered clean and punchy.', edge: 'Only the screen border, like an ambilight.' };
+    const styles = ['average', 'vivid', 'dominant', 'edge'].map((id) => ({ label: id[0].toUpperCase() + id.slice(1), pressed: s.style === id ? 'true' : 'false', pick: () => this.setState({ style: id }), style: seg(s.style === id) }));
+    const sources = [['system', 'System sound'], ['mic', 'Microphone']].map(([id, label]) => ({ label, pressed: s.source === id ? 'true' : 'false', pick: () => this.setState({ source: id }), style: seg(s.source === id) }));
+    const levels = [30, 52, 70, 88, 64, 45, 78, 92, 60, 40, 55, 72, 84, 58, 36, 48, 66, 42];
+    const meter = levels.map((l) => 'flex-grow:1;height:' + l + '%;border-radius:3px;background:' + (dark ? accent : ink) + ';opacity:' + (0.35 + l / 160).toFixed(2) + ';');
+    return {
+      p, theme, accent, targets, styles, sources, meter, styleDesc: descs[s.style],
+      primaryBorder: dark ? '0' : '1px solid ' + ink,
+      toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }),
+      dpStyle: mon('DP-1', 150, 96), hdmiStyle: mon('HDMI-1', 118, 72),
+      pickDp: () => this.setState({ target: 'DP-1' }), pickHdmi: () => this.setState({ target: 'HDMI-1' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

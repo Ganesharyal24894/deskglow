@@ -1,0 +1,56 @@
+{
+  "id": "elk-bledom",
+  "name": "ELK-BLEDOM / MELK family",
+  "description": "Cheap BLE RGB strip controllers that advertise service fff0 and take 9-byte 0x7E..0xEF frames on fff3 (e.g. MELK-OA10 / SC295, ELK-BLEDOM). The Triones 0x56.. protocol does NOT work on these.",
+  "match": {
+    "service_uuids": ["0000fff0-0000-1000-8000-00805f9b34fb"],
+    "name_hints": ["MELK", "ELK", "LEDBLE", "LED-BLE", "LEDBle", "BLEDOM",
+                   "LED", "SP", "KS", "iDeal", "Triones", "QHM"]
+  },
+  "gatt": {
+    "write": "0000fff3-0000-1000-8000-00805f9b34fb",
+    "notify": "0000fff4-0000-1000-8000-00805f9b34fb"
+  },
+  "ranges": {
+    "r": [0, 255],
+    "g": [0, 255],
+    "b": [0, 255],
+    "brightness": [0, 100],
+    "speed": [0, 100],
+    "effect": [0, 255]
+  },
+  "frames": {
+    "power_on": "7E 00 04 F0 00 01 FF 00 EF",
+    "power_off": "7E 00 04 00 00 00 FF 00 EF",
+    "color": "7E 00 05 03 {r} {g} {b} 00 EF",
+    "brightness": "7E 00 01 {brightness} 00 00 00 00 EF",
+    "effect": "7E 00 03 {effect} 03 00 00 00 EF",
+    "speed": "7E 00 02 {speed} 00 00 00 00 EF",
+    "status_query": "7E 00 00 00 00 00 00 00 EF"
+  },
+  "default_effect": "fade-colors",
+  "effects": {
+    "jump-rgb": "0x87",
+    "jump-colors": "0x88",
+    "fade-rgb": "0x89",
+    "fade-colors": "0x8A",
+    "fade-red": "0x8B",
+    "fade-green": "0x8C",
+    "fade-blue": "0x8D",
+    "fade-yellow": "0x8E",
+    "fade-cyan": "0x8F",
+    "fade-magenta": "0x90",
+    "fade-white": "0x91",
+    "fade-red-green": "0x92",
+    "fade-red-blue": "0x93",
+    "fade-green-blue": "0x94",
+    "blink-colors": "0x95",
+    "blink-red": "0x96",
+    "blink-green": "0x97",
+    "blink-blue": "0x98",
+    "blink-yellow": "0x99",
+    "blink-cyan": "0x9A",
+    "blink-magenta": "0x9B",
+    "blink-white": "0x9C"
+  }
+}

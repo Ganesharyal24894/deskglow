@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deskglow tray panel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',sans-serif}
+a{color:inherit}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 340px; height: 520px; box-sizing: border-box; padding: 20px; background: {{p.panel}}; border: 1px solid {{p.line2}}; border-radius: 18px; display: flex; flex-direction: column; gap: 18px; font-family: 'IBM Plex Sans', sans-serif; color: {{p.text}}">
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="display: flex; flex-direction: column; flex-grow: 1">
+<span style="font-family: Sora, sans-serif; font-weight: 600; font-size: 16px">Desk strip</span>
+<span style="font-size: 12px; color: {{p.muted}}">{{status}}</span>
+</div>
+<button type="button" aria-label="{{themeLabel}}" title="{{themeLabel}}" onClick="{{flipTheme}}" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: transparent; border: 1px solid {{p.line2}}; color: {{p.muted}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{themeIcon}}"></path></svg></button>
+<button type="button" role="switch" aria-checked="{{onStr}}" aria-label="Power" onClick="{{toggle}}" style="{{track}}"><span style="{{knob}}"></span></button>
+</div>
+<div style="{{stage}}"><div style="{{strip}}"></div></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<label for="tb" style="font-size: 13px; color: {{p.muted}}">Brightness</label>
+<input id="tb" type="range" min="0" max="100" value="{{bri}}" onInput="{{setBri}}" style="flex-grow: 1; height: 24px; accent-color: {{p.text}}">
+<span style="width: 40px; text-align: right; font-size: 13px; font-weight: 600">{{bri}}%</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{swatches}}" as="s" hint-placeholder-count="8">
+<button type="button" aria-label="{{s.name}}" onClick="{{s.pick}}" style="{{s.style}}"></button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{quick}}" as="q" hint-placeholder-count="4">
+<button type="button" style="{{quickStyle}}">{{q}}</button>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid {{p.line}}">
+<a href="Main.dc.html" style="flex-grow: 1; font-size: 13px; font-weight: 500; text-decoration: none; color: {{p.text}}">Open Deskglow</a>
+<button type="button" style="height: 36px; padding: 0 12px; border-radius: 9px; background: transparent; border: 1px solid {{p.line2}}; color: {{p.muted}}; font: 500 13px 'IBM Plex Sans', sans-serif; cursor: pointer">Quit</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":340,"height":520}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { on: true, bri: 80, color: '#FFB46E', theme: null }; }
+  renderVals() {
+    const s = this.state;
+    const theme = s.theme ?? this.props.theme ?? 'dark';
+    const dark = theme === 'dark';
+    const PAL = {
+      dark: { panel: '#17171C', line: '#25252D', line2: '#2A2A33', btn: '#1F1F26', text: '#ECECF1', muted: '#A0A0AD', strong: '#FFFFFF', off: '#2A2A33', knobOff: '#A0A0AD', stage: 'transparent' },
+      light: { panel: '#FFFFFF', line: '#E4E2DC', line2: '#D6D4CD', btn: '#F2F1ED', text: '#1A1A1F', muted: '#5E5E69', strong: '#0E0E12', off: '#D6D4CD', knobOff: '#FFFFFF', stage: '#1B1B20' },
+    };
+    const p = PAL[theme];
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(s.color.slice(i, i + 2), 16));
+    const ink = dark ? s.color : 'rgb(' + Math.round(r * 0.55) + ',' + Math.round(g * 0.55) + ',' + Math.round(b * 0.55) + ')';
+    const glow = 'rgba(' + r + ',' + g + ',' + b + ',' + (s.on ? (0.25 + 0.6 * s.bri / 100).toFixed(2) : 0) + ')';
+    const list = [['#FFB46E', 'Warm white'], ['#FFFFFF', 'White'], ['#FF3B30', 'Red'], ['#FF7A1A', 'Orange'], ['#3DDC97', 'Mint'], ['#00B8C7', 'Teal'], ['#5B8CFF', 'Blue'], ['#B35CFF', 'Violet']];
+    return {
+      p, onStr: s.on ? 'true' : 'false', bri: s.bri,
+      status: s.on ? 'Solid colour · connected' : 'Off · connected',
+      themeLabel: dark ? 'Switch to light mode' : 'Switch to dark mode',
+      themeIcon: dark ? 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4' : 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
+      flipTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }),
+      toggle: () => this.setState({ on: !s.on }),
+      setBri: (e) => this.setState({ bri: Number(e.target.value) }),
+      track: 'position:relative;width:48px;height:28px;flex-shrink:0;border-radius:14px;cursor:pointer;padding:0;border:0;background:' + (s.on ? ink : p.off) + ';',
+      knob: 'position:absolute;top:3px;left:' + (s.on ? '23px' : '3px') + ';width:22px;height:22px;border-radius:11px;background:' + (s.on ? (dark ? '#141413' : '#FFFFFF') : p.knobOff) + ';box-shadow:0 1px 2px rgba(0,0,0,0.25);',
+      stage: 'padding:' + (dark ? '6px 4px' : '18px 16px') + ';border-radius:12px;background:' + p.stage + ';',
+      strip: 'height:10px;border-radius:5px;background:' + (s.on ? s.color : '#3A3A42') + ';box-shadow:0 0 28px 8px ' + glow + ';',
+      swatches: list.map(([c, name]) => ({ name, pick: () => this.setState({ color: c, on: true }), style: 'height:44px;border-radius:12px;cursor:pointer;background:' + c + ';border:' + (c === s.color ? '2px solid ' + p.strong : '1px solid ' + p.line2) + ';' })),
+      quickStyle: 'height:44px;border-radius:12px;background:' + p.btn + ';border:1px solid ' + p.line2 + ';color:' + p.text + ';font:500 13px \'IBM Plex Sans\',sans-serif;cursor:pointer;',
+      quick: ['Screen sync', 'Music', 'Calm', 'Effects'],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deskglow settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',sans-serif}
+a{color:inherit}a:hover{color:inherit}
+</style>
+</helmet>
+<div style="width: 1040px; height: 720px; display: flex; background: {{p.bg}}; font-family: 'IBM Plex Sans', sans-serif; color: {{p.text}}; overflow: hidden">
+<dc-import name="Sidebar" active="settings" accent="{{accent}}" theme="{{theme}}" on-toggle-theme="{{toggleTheme}}" hint-size="216px,720px"></dc-import>
+<main style="flex-grow: 1; box-sizing: border-box; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px">
+<h1 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 26px; letter-spacing: -0.02em">Settings</h1>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; flex-grow: 1">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<section aria-label="Strip" style="box-sizing: border-box; padding: 20px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: 15px">Strip</h2>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="nm" style="font-size: 13px; color: {{p.muted}}">Name</label>
+<input id="nm" type="text" value="Desk strip" style="height: 44px; box-sizing: border-box; padding: 0 12px; background: {{p.inset}}; border: 1px solid {{p.line2}}; border-radius: 10px; color: {{p.text}}; font: 400 14px 'IBM Plex Sans', sans-serif">
+</div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: {{p.muted}}">
+<span>Address</span><span style="font-family: 'IBM Plex Mono', monospace; color: {{p.text}}">A4:C1:38:5E:22:9B</span><span style="flex-grow: 1"></span><span>MELK-OA10</span>
+</div>
+<div style="display: flex; gap: 10px">
+<a href="Setup.dc.html" style="flex-grow: 1; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: {{p.btn}}; border: 1px solid {{p.line2}}; color: {{p.text}}; text-decoration: none; font-size: 14px; font-weight: 500">Find another strip</a>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 10px; background: transparent; border: 1px solid {{p.dangerLine}}; color: {{p.danger}}; font: 500 14px 'IBM Plex Sans', sans-serif; cursor: pointer">Forget</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex"><label for="ceil" style="font-size: 13px; color: {{p.muted}}; flex-grow: 1">Maximum brightness</label><span style="font-size: 13px">85%</span></div>
+<input id="ceil" type="range" min="0" max="100" value="85" style="height: 24px; accent-color: {{p.text}}">
+<div style="font-size: 12px; color: {{p.muted}}">A cap for every mode. Lower it if your power supply is small.</div>
+</div>
+</section>
+<section aria-label="About" style="box-sizing: border-box; padding: 20px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; align-items: center; gap: 12px">
+<div style="display: flex; flex-direction: column; flex-grow: 1">
+<span style="font-size: 14px; font-weight: 600">Deskglow 0.2.0</span>
+<span style="font-size: 12px; color: {{p.muted}}">MIT licensed · open source</span>
+</div>
+<button type="button" style="height: 40px; padding: 0 14px; border-radius: 10px; background: {{p.btn}}; border: 1px solid {{p.line2}}; color: {{p.text}}; font: 500 13px 'IBM Plex Sans', sans-serif; cursor: pointer">Open logs</button>
+<a href="https://github.com" style="height: 40px; padding: 0 14px; display: flex; align-items: center; border-radius: 10px; background: {{p.btn}}; border: 1px solid {{p.line2}}; color: {{p.text}}; text-decoration: none; font-size: 13px; font-weight: 500">GitHub</a>
+</section>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px">
+<section aria-label="App" style="box-sizing: border-box; padding: 20px; background: {{p.panel}}; border: 1px solid {{p.line}}; border-radius: 20px; display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0 0 8px; font-family: Sora, sans-serif; font-weight: 600; font-size: 15px">App</h2>
+<sc-for list="{{toggles}}" as="t" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 12px; min-height: 52px">
+<div style="display: flex; flex-direction: column; flex-grow: 1">
+<span style="font-size: 14px">{{t.label}}</span>
+<span style="font-size: 12px; color: {{p.muted}}">{{t.desc}}</span>
+</div>
+<button type="button" role="switch" aria-checked="{{t.checked}}" aria-label="{{t.label}}" onClick="{{t.flip}}" style="{{t.track}}"><span style="{{t.knob}}"></span></button>
+</div>
+</sc-for>
+<div style="display: flex; align-items: center; gap: 12px; min-height: 52px">
+<div style="display: flex; flex-direction: column; flex-grow: 1">
+<span style="font-size: 14px">Theme</span>
+<span style="font-size: 12px; color: {{p.muted}}">The sidebar switch flips Dark and Light</span>
+</div>
+<div role="group" aria-label="Theme" style="display: flex; gap: 4px; padding: 4px; background: {{p.inset}}; border-radius: 10px">
+<sc-for list="{{themes}}" as="th" hint-placeholder-count="3">
+<button type="button" aria-pressed="{{th.pressed}}" onClick="{{th.pick}}" style="{{th.style}}">{{th.label}}</button>
+</sc-for>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","options":["#FFB46E","#5B8CFF","#FF4D8D","#3DDC97"],"default":"#FFB46E"},"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"$preview":{"width":1040,"height":720}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { login: true, tray: true, sunset: false, hotkey: true, pref: null, theme: null }; }
+  renderVals() {
+    const s = this.state;
+    const theme = s.theme ?? this.props.theme ?? 'dark';
+    const dark = theme === 'dark';
+    const pref = s.pref ?? theme;
+    const PAL = {
+      dark: { bg: '#0F0F12', panel: '#17171C', line: '#25252D', btn: '#1F1F26', line2: '#2A2A33', inset: '#111115', segOn: '#2A2A33', segShadow: 'none', text: '#ECECF1', muted: '#A0A0AD', strong: '#FFFFFF', off: '#2A2A33', knobOff: '#A0A0AD', dangerLine: '#5A2A2A', danger: '#FF8A80' },
+      light: { bg: '#F4F3EF', panel: '#FFFFFF', line: '#E4E2DC', btn: '#F2F1ED', line2: '#D6D4CD', inset: '#F2F1ED', segOn: '#FFFFFF', segShadow: '0 1px 2px rgba(20,20,30,0.12)', text: '#1A1A1F', muted: '#5E5E69', strong: '#0E0E12', off: '#D6D4CD', knobOff: '#FFFFFF', dangerLine: '#F0C4BF', danger: '#B3261E' },
+    };
+    const p = PAL[theme];
+    const accent = this.props.accent ?? '#FFB46E';
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(accent.slice(i, i + 2), 16));
+    const ink = dark ? accent : 'rgb(' + Math.round(r * 0.55) + ',' + Math.round(g * 0.55) + ',' + Math.round(b * 0.55) + ')';
+    const defs = [
+      ['login', 'Start at login', 'Restores the last mode when you sign in'],
+      ['tray', 'Keep running in the tray', 'Closing the window leaves the light on'],
+      ['hotkey', 'Global shortcut', 'Ctrl+Alt+L toggles the strip anywhere'],
+      ['sunset', 'Turn on at sunset', 'Uses your time zone, no location needed'],
+    ];
+    const toggles = defs.map(([id, label, desc]) => ({
+      label, desc, checked: s[id] ? 'true' : 'false',
+      flip: () => this.setState({ [id]: !s[id] }),
+      track: 'position:relative;width:48px;height:28px;flex-shrink:0;border-radius:14px;cursor:pointer;padding:0;border:0;background:' + (s[id] ? ink : p.off) + ';',
+      knob: 'position:absolute;top:3px;left:' + (s[id] ? '23px' : '3px') + ';width:22px;height:22px;border-radius:11px;background:' + (s[id] ? (dark ? '#141413' : '#FFFFFF') : p.knobOff) + ';box-shadow:0 1px 2px rgba(0,0,0,0.25);',
+    }));
+    const themes = [['system', 'System'], ['dark', 'Dark'], ['light', 'Light']].map(([id, label]) => ({
+      label, pressed: pref === id ? 'true' : 'false',
+      pick: () => this.setState(id === 'system' ? { pref: 'system' } : { pref: id, theme: id }),
+      style: 'height:34px;padding:0 12px;border-radius:8px;border:0;cursor:pointer;font:500 13px \'IBM Plex Sans\',sans-serif;' + (pref === id ? 'background:' + p.segOn + ';color:' + p.strong + ';box-shadow:' + p.segShadow + ';' : 'background:transparent;color:' + p.muted + ';'),
+    }));
+    return {
+      p, theme, accent, toggles, themes,
+      toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark', pref: dark ? 'light' : 'dark' }),
+    };
+  }
+}
+</script>
+</body>
+</html>
