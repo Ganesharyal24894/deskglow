@@ -14,7 +14,9 @@ def default_socket_path(env=None):
     runtime = env.get("XDG_RUNTIME_DIR")
     if runtime and os.path.isdir(runtime):
         return os.path.join(runtime, SOCKET_NAME)
-    return f"/tmp/deskglowd-{os.getuid()}.sock"
+    # os.getuid is POSIX-only; fall back to the login name elsewhere
+    owner = os.getuid() if hasattr(os, "getuid") else os.environ.get("USERNAME", "user")
+    return f"/tmp/deskglowd-{owner}.sock"
 
 
 def macos_socket_path(dirs, private_dir=None):

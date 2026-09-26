@@ -49,6 +49,14 @@ def test_socket_path_falls_back_to_a_uid_scoped_tmp_path(env):
     assert default_socket_path(env) == f"/tmp/deskglowd-{os.getuid()}.sock"
 
 
+def test_socket_path_works_without_os_getuid(monkeypatch):
+    """Regression (Windows CI): os.getuid does not exist on Windows, and the
+    Linux wiring is built there in tests -> the fallback must not crash."""
+    monkeypatch.delattr(os, "getuid", raising=False)
+    monkeypatch.setenv("USERNAME", "ada")
+    assert default_socket_path({}) == "/tmp/deskglowd-ada.sock"
+
+
 def test_socket_path_reads_the_process_environment_by_default(tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
     assert default_socket_path() == str(tmp_path / "deskglowd.sock")

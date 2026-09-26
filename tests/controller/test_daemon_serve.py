@@ -6,6 +6,7 @@ its endpoint inside tmp_path.
 import asyncio
 import json
 import os
+import sys
 
 import pytest
 from daemon_support import (ENDPOINT_NAME, ipc_drivers, make_daemon, open_raw,
@@ -31,7 +32,8 @@ async def test_serve_creates_socket_answers_ping_and_cleans_up(sock):
     task, path = await serve_in_background(d)
     try:
         assert os.path.exists(path)
-        assert os.stat(path).st_mode & 0o777 == 0o600
+        if sys.platform != "win32":  # Windows has no mode bits; the per-user dir ACL guards it
+            assert os.stat(path).st_mode & 0o777 == 0o600
         ping = await d.services.ipc_client.request({"cmd": "ping"}, timeout=5.0)
         assert ping["pong"] is True
     finally:
