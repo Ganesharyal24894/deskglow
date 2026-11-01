@@ -38,7 +38,10 @@ async def serve_connection(handler, reader, writer):
             return
         if req is None:
             return
-        await write_message(writer, await handler.handle_request(req))
+        reply = await handler.handle_request(req)
+        # the peer may hang up before the reply (a killed client): not an error
+        with contextlib.suppress(ConnectionError):
+            await write_message(writer, reply)
     finally:
         writer.close()
         with contextlib.suppress(Exception):

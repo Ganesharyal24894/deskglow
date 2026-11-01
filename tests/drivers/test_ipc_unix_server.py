@@ -83,6 +83,18 @@ async def test_serve_connection_answers_garbage_with_the_malformed_reply():
     assert w.closed
 
 
+async def test_serve_connection_ignores_a_peer_that_hung_up_before_the_reply():
+    """Regression: a client that disconnects early (e.g. a killed GUI) made
+    the daemon log an unhandled ConnectionResetError traceback."""
+    class GoneWriter(FakeWriter):
+        async def drain(self):
+            raise ConnectionResetError("Connection lost")
+
+    h, w = Handler(), GoneWriter()
+    await serve_connection(h, stream_of(b'{"cmd": "ping"}\n'), w)
+    assert h.requests == [{"cmd": "ping"}] and w.closed
+
+
 async def test_serve_connection_writes_nothing_when_the_peer_sends_nothing():
     h, w = Handler(), FakeWriter()
     await serve_connection(h, stream_of(b""), w)
